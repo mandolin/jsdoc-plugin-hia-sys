@@ -1,0 +1,12 @@
+{
+  "zh-CN": {
+    "shared.helper": {
+      "text": "标准化用户名称。"
+    }
+  },
+  "en": {
+    "shared.helper": {
+      "text": "Normalizes a user name."
+    }
+  }
+}

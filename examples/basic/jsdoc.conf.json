@@ -1,0 +1,37 @@
+{
+  "plugins": ["./src/index.cjs"],
+  "source": {
+    "include": ["examples/basic/src"]
+  },
+  "opts": {
+    "destination": "examples/basic/out",
+    "recurse": true,
+    "hia": {
+      "mode": "standalone",
+      "source": {
+        "link": {
+          "enabled": true,
+          "rootUrl": "https://example.test/repo",
+          "openMode": "currentPage"
+        },
+        "preview": {
+          "enabled": true,
+          "defaultExpanded": false
+        }
+      },
+      "i18n": {
+        "enabled": true,
+        "defaultLocale": "zh-CN",
+        "fallbackLocale": "en",
+        "locales": ["zh-CN", "en"],
+        "mode": "runtimeSwitch",
+        "resourceBasePath": ".",
+        "resources": ["examples/basic/i18n/docs.hia-i18n.json"]
+      },
+      "integration": {
+        "enabled": true,
+        "outputFile": "examples/basic/out/hia-integration.json"
+      }
+    }
+  }
+}

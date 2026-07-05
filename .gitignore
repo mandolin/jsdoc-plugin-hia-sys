@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+dist/
+examples/basic/out/
+*.tgz
+npm-debug.log*
+.env
+.env.*
+.DS_Store
