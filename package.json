@@ -4,6 +4,14 @@
   "private": true,
   "description": "HIA JSDoc integration system with internal micro-plugin support.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mandolin/jsdoc-plugin-hia-sys.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mandolin/jsdoc-plugin-hia-sys/issues"
+  },
+  "homepage": "https://github.com/mandolin/jsdoc-plugin-hia-sys#readme",
   "main": "src/index.cjs",
   "exports": {
     ".": "./src/index.cjs"

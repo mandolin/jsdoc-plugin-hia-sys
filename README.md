@@ -2,6 +2,8 @@
 
 `jsdoc-plugin-hia-sys` 是新的 HIA JSDoc 集成系统。
 
+GitHub: <https://github.com/mandolin/jsdoc-plugin-hia-sys>
+
 它不继续重构旧 `jsdoc-plugin-hia`，而是吸收旧库中已经验证过的能力，重新建立边界：
 
 - 面向普通前端项目，可作为独立 JSDoc 插件使用。
