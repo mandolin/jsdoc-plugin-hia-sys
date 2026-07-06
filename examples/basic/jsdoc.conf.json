@@ -9,12 +9,17 @@
     "hia": {
       "mode": "standalone",
       "source": {
+        "mode": "all",
         "link": {
           "enabled": true,
           "rootUrl": "https://example.test/repo",
           "openMode": "currentPage"
         },
         "preview": {
+          "enabled": true,
+          "defaultExpanded": false
+        },
+        "references": {
           "enabled": true,
           "defaultExpanded": false
         }

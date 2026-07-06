@@ -1,53 +1,46 @@
-# jsdoc-plugin-hia-sys
+# @mandolin/jsdoc-plugin-hia-sys
 
-`jsdoc-plugin-hia-sys` 是新的 HIA JSDoc 集成系统。
+HIA metadata plugin for JSDoc.
+
+`@mandolin/jsdoc-plugin-hia-sys` extends JSDoc with structured metadata for source references, source previews, multilingual documentation and optional HIA integration output. It can be used as a standalone JSDoc plugin in ordinary JavaScript projects, or as a JSDoc adapter in a larger HIA documentation pipeline.
 
 GitHub: <https://github.com/mandolin/jsdoc-plugin-hia-sys>
 
-它不继续重构旧 `jsdoc-plugin-hia`，而是吸收旧库中已经验证过的能力，重新建立边界：
+## Features
 
-- 面向普通前端项目，可作为独立 JSDoc 插件使用。
-- 面向 HIA Documentation Sys，可作为 JSDoc adapter 输出 HIA IR。
-- 内部可以建立微插件体系，组合源码片段引用、源码链接、源码预览、多语言文档和诊断能力。
+- Adds `doclet.hia` metadata to JSDoc doclets.
+- Supports source fragment markers with `@codeblock`, `@codeblockend` and `@coderef`.
+- Generates `definedIn`, `primaryBlock`, source link and source preview metadata for themes.
+- Supports `@lang`, XML-like `<lang>` inline segments and resource-backed multilingual documentation metadata.
+- Provides a small internal micro-plugin pipeline for feature composition.
+- Can write an HIA Integration JSON file for downstream tooling.
+- Includes diagnostics for missing fragments, missing translations and related metadata issues.
 
-## 设计原则
+## Install
 
-- 保留旧 `@codeblock/@codeblockend/@coderef` 的语义价值。
-- 不复制旧库的全局状态和路径耦合实现。
-- JSDoc 相关逻辑留在本包，语言无关模型沉到 `packages/core`。
-- HIA core 不依赖本包。
-- 普通用户可以只安装本包和 `jsdoc-theme-hia`，不必理解完整 HIA 体系。
+```bash
+npm install --save-dev jsdoc @mandolin/jsdoc-plugin-hia-sys
+```
 
-## 候选内部模块
+For projects that also need the companion HTML theme:
 
-- `code-fragment`
-- `source-link`
-- `source-preview`
-- `doc-i18n`
-- `doclet-normalizer`
-- `hia-ir-exporter`
-- `diagnostics`
+```bash
+npm install --save-dev jsdoc @mandolin/jsdoc-plugin-hia-sys @mandolin/jsdoc-theme-hia
+```
 
-## 当前状态
+## Basic Usage
 
-`G-JPHS-P1` 已建立最小 package、JSDoc 插件入口、内部微插件运行器、配置读取、metadata 写入、诊断收集和 fixture 测试。
-
-`G-JPHS-P2` 已建立源码片段引用链路，支持扫描 `@codeblock/@codeblockend`、解析 `@coderef`、跨文件引用、source link、source preview 和基础诊断。
-
-`G-JPHS-P3` 已建立多语言文档首批能力，支持 `@hiaText`、`@hiaBlock`、外部 JSON 语言资源、fallback、`perLocale`、`runtimeSwitch` 和 `hiaIntegration` metadata。
-
-`G-JPHS-P4` 已建立 Standalone 与 HIA Integration 双模式输出契约，支持 `state.output.standalone`、`state.output.integration`、主题消费契约、doclet-node 映射和 integration JSON 文件写出。
-
-`G-JPHS-P5` 已完成当前规划周期收尾，补齐 release check、changelog、发布检查清单、第三方审计记录、示例说明和端到端验证入口。
-
-## 使用方式
-
-在 JSDoc 配置中加载插件：
+Add the plugin to your JSDoc configuration:
 
 ```json
 {
-  "plugins": ["./src/index.cjs"],
+  "plugins": ["node_modules/@mandolin/jsdoc-plugin-hia-sys/src/index.cjs"],
+  "source": {
+    "include": ["src"]
+  },
   "opts": {
+    "destination": "docs/api",
+    "recurse": true,
     "hia": {
       "mode": "standalone"
     }
@@ -55,59 +48,44 @@ GitHub: <https://github.com/mandolin/jsdoc-plugin-hia-sys>
 }
 ```
 
-当前支持从 `opts.hia`、`opts["jsdoc-plugin-hia-sys"]`、`hia` 或 `jsdoc-plugin-hia-sys` 读取配置。
+Configuration can be placed under `opts.hia`, `hia`, `opts["jsdoc-plugin-hia-sys"]`, `opts["@mandolin/jsdoc-plugin-hia-sys"]`, `jsdoc-plugin-hia-sys` or `@mandolin/jsdoc-plugin-hia-sys`.
 
-写出 HIA Integration JSON：
+## Source Metadata
+
+Each doclet receives source metadata when JSDoc provides file and line information:
+
+- `doclet.hia.source.definedIn`: relative path, line, language and source link metadata.
+- `doclet.hia.source.primaryBlock`: a source preview block for the doclet itself. The default range strategy uses a JavaScript declaration parser with heuristic fallback.
+- `doclet.hia.source.references`: extra source fragments referenced with `@coderef`.
+
+Enable source links and previews in JSDoc configuration:
 
 ```json
 {
   "opts": {
     "hia": {
-      "mode": "hiaIntegration",
-      "integration": {
-        "enabled": true,
-        "outputFile": "examples/basic/out/hia-integration.json"
+      "source": {
+        "basePath": ".",
+        "mode": "all",
+        "link": {
+          "enabled": true,
+          "rootUrl": "https://github.com/example/project/blob/main",
+          "openMode": "new-tab"
+        },
+        "preview": {
+          "enabled": true,
+          "defaultExpanded": false,
+          "rangeStrategy": "parser-js"
+        }
       }
     }
   }
 }
 ```
 
-## 脚本
+## Source References
 
-```bash
-npm run check:syntax
-npm test
-npm run test:jsdoc
-npm run release:check
-npm run test:all
-```
-
-`npm test` 使用本地 fixture runner 验证插件入口、微插件顺序、`doclet.hia` metadata 和最小 HIA Integration 输出。
-
-`npm run test:jsdoc` 需要安装 dev dependency 后运行，用真实 JSDoc 加载 `examples/basic/jsdoc.conf.json`。
-
-`npm run release:check` 会执行包元数据、必需文件、示例配置和未清理生成物检查，并运行 `npm pack --dry-run`。
-
-## 已建立模块
-
-- `src/index.cjs`: JSDoc plugin 入口。
-- `src/config/defaults.cjs`: 默认配置和配置合并。
-- `src/runtime/create-plugin-system.cjs`: 内部微插件运行器。
-- `src/runtime/diagnostics.cjs`: 最小诊断收集器。
-- `src/runtime/metadata.cjs`: `doclet.hia` metadata 写入。
-- `src/runtime/output-contract.cjs`: Standalone、主题消费和 HIA Integration 输出契约。
-- `src/micro-plugins/*`: 首批内置微插件。
-- `examples/basic/`: 最小 JSDoc 示例。
-- `test/run-fixtures.cjs`: 最小 fixture 测试。
-- `scripts/release-check.cjs`: 发布前结构检查。
-- `CHANGELOG.md`: 变更记录。
-- `RELEASE_CHECKLIST.md`: 包级发布检查清单。
-- `THIRD_PARTY_NOTICES.md`: 第三方依赖和资产审计。
-
-## 源码片段引用
-
-在源码中标记可引用片段：
+Mark reusable source fragments in code:
 
 ```js
 function greet(name) {
@@ -118,38 +96,48 @@ function greet(name) {
 }
 ```
 
-在文档注释中引用片段：
+Reference the fragment from a JSDoc comment:
 
 ```js
 /**
  * Greets a user.
  *
- * @example
- * // @coderef GREET_BODY
+ * @example <caption>Basic greeting</caption>
  * @coderef GREET_BODY
  */
 function greet(name) {}
 ```
 
-当前 `@coderef` 可出现在 `description`、`examples`、`properties[].description` 和 `@coderef` 标签中。插件会向 `doclet.hia.source.references` 写入引用数据，并包含 source link 与 source preview metadata。
+The plugin writes reference data to `doclet.hia.source.references`, including source link and preview metadata when enabled.
 
-## 多语言文档
+## Multilingual Metadata
 
-定义文档 key、path 和内联多语言内容：
+Use `@lang` for localized doclet descriptions:
 
 ```js
 /**
- * Greets a user.
- *
- * @hiaKey greet.description
- * @hiaPath api.greet
- * @hiaText zh-CN 问候一个用户。
- * @hiaText en Greets a user.
+ * @hiaKey user.greet
+ * @hiaPath api.user.greet
+ * @lang zh-CN 问候一个用户。
+ * @lang en Greets a user.
  */
 function greet(name) {}
 ```
 
-配置外部语言资源：
+Use `<lang>` inside any description text field:
+
+```js
+/**
+ * Greets a <lang key="greet.target"><zh-CN>用户</zh-CN><en>user</en></lang>.
+ *
+ * @param {string} name User <lang key="greet.param.name"><zh-CN>名称</zh-CN><en>name</en></lang>.
+ */
+function greet(name) {}
+```
+
+The plugin writes field-level data to `doclet.hia.i18n.fields`. For compatibility, it also keeps the older `doclet.hia.i18n.localized` and generation fields. `@hiaText` and `@hiaBlock` are still accepted as compatibility inputs.
+
+External resource files are also supported:
 
 ```json
 {
@@ -161,56 +149,72 @@ function greet(name) {}
         "fallbackLocale": "en",
         "locales": ["zh-CN", "en"],
         "mode": "runtimeSwitch",
-        "resources": ["examples/basic/i18n/docs.hia-i18n.json"]
+        "resources": ["docs/i18n/docs.hia-i18n.json"]
       }
     }
   }
 }
 ```
 
-外部资源格式支持按 locale 分组：
+Resource files can be grouped by locale:
 
 ```json
 {
   "zh-CN": {
-    "shared.helper": {
-      "text": "标准化用户名称。"
+    "user.greet": {
+      "text": "问候一个用户。"
     }
   },
   "en": {
-    "shared.helper": {
-      "text": "Normalizes a user name."
+    "user.greet": {
+      "text": "Greets a user."
     }
   }
 }
 ```
 
-插件会向 `doclet.hia.i18n` 写入 `localized`、`missingLocales`、`resources` 和 `generation` 数据。`generation` 当前包含 `perLocale`、`runtimeSwitch` 和 `hiaIntegration` 三种最小数据形态。
+## HIA Integration Output
 
-## 输出契约
+Standalone mode enriches JSDoc doclets for themes and local tooling. HIA Integration mode additionally writes a JSON artifact for downstream processing:
 
-Standalone 模式面向 `jsdoc-theme-hia` 和普通 JSDoc 工程：
+```json
+{
+  "opts": {
+    "hia": {
+      "mode": "hiaIntegration",
+      "integration": {
+        "enabled": true,
+        "outputFile": "docs/api/hia-integration.json"
+      }
+    }
+  }
+}
+```
 
-- 增强后的 JSDoc doclets。
-- `doclet.hia` metadata。
-- source fragment/link/preview 数据。
-- doc-i18n 数据。
-- diagnostics。
+The integration artifact currently contains IR nodes, source fragments, localization resources, diagnostics and a doclet-to-node map.
 
-HIA Integration 模式面向后续 HIA core 和 parser-jsdoc 链路：
+## Scripts
 
-- `state.output.integration.ir.nodes`
-- `state.output.integration.sourceFragments`
-- `state.output.integration.localizationResources`
-- `state.output.integration.diagnostics`
-- `state.output.integration.docletNodeMap`
-- `state.output.integration.parserBoundary`
+```bash
+npm run check:syntax
+npm test
+npm run test:jsdoc
+npm run release:check
+npm run test:all
+```
 
-正式文档见 `../../docs/contracts/jsdoc-hia-output-contract.md`。
+`npm test` runs fixture coverage for the plugin pipeline and metadata output. `npm run test:jsdoc` loads the plugin through real JSDoc. `npm run release:check` validates package metadata and required release files.
 
-## 当前边界
+## Compatibility
 
-- `code-fragment`、`source-link`、`source-preview`、`doc-i18n` 已进入首批内置微插件列表。
-- `@codeblock/@codeblockend/@coderef` 的基础语义已在 `G-JPHS-P2` 实现，后续可继续增强更复杂的语法和显示格式。
-- 多语言文档首批链路已在 `G-JPHS-P3` 实现，后续可继续增强资源格式、生成策略和 IDE 协作。
-- Standalone 和 HIA Integration 的首版输出契约已在 `G-JPHS-P4` 收敛，后续会在 `W-P2` 和 ADR 中继续稳定核心 IR schema。
+- Node.js 18 or newer.
+- JSDoc 4.x.
+- CommonJS runtime.
+
+## Stability
+
+Version `0.1.0` is an early public package. The Standalone metadata shape is intended for experimentation and companion-theme use. The HIA Integration IR is still a draft contract and may change before a stable release.
+
+## License
+
+MIT

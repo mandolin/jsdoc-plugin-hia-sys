@@ -2,7 +2,7 @@
 
 ## Scope
 
-Package: `jsdoc-plugin-hia-sys`
+Package: `@mandolin/jsdoc-plugin-hia-sys`
 
 Version: `0.1.0`
 

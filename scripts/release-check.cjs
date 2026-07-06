@@ -32,7 +32,7 @@ function exists(relativePath) {
 
 function assertNoGeneratedOutput() {
   assert.equal(exists("examples/basic/out"), false, "examples/basic/out must not be committed");
-  assert.equal(exists("jsdoc-plugin-hia-sys-0.1.0.tgz"), false, "dry-run tarball must not remain");
+  assert.equal(exists("mandolin-jsdoc-plugin-hia-sys-0.1.0.tgz"), false, "dry-run tarball must not remain");
 }
 
 function run() {
@@ -40,10 +40,10 @@ function run() {
   const exampleConfig = readJson("examples/basic/jsdoc.conf.json");
   const i18nResource = readJson("examples/basic/i18n/docs.hia-i18n.json");
 
-  assert.equal(pkg.name, "jsdoc-plugin-hia-sys");
+  assert.equal(pkg.name, "@mandolin/jsdoc-plugin-hia-sys");
   assert.equal(pkg.version, "0.1.0");
   assert.equal(pkg.license, "MIT");
-  assert.equal(pkg.private, true);
+  assert.equal(pkg.private, false);
   assert.equal(pkg.main, "src/index.cjs");
   assert.equal(pkg.repository.url, "git+https://github.com/mandolin/jsdoc-plugin-hia-sys.git");
   assert.equal(pkg.bugs.url, "https://github.com/mandolin/jsdoc-plugin-hia-sys/issues");
@@ -68,7 +68,7 @@ function run() {
 
   assertNoGeneratedOutput();
 
-  console.log("jsdoc-plugin-hia-sys release check passed.");
+  console.log("@mandolin/jsdoc-plugin-hia-sys release check passed.");
 }
 
 run();

@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Field-level text i18n metadata at `doclet.hia.i18n.fields`.
+- `@lang` doclet description blocks and XML-like `<lang>` inline segments.
+- Source metadata at `doclet.hia.source.definedIn` and `doclet.hia.source.primaryBlock`.
+- Source metadata contract fields for `kind`, `referenceKind`, `model` and `modelVersion`.
+- JavaScript declaration range parser for `doclet.hia.source.primaryBlock`, with heuristic fallback.
+
+### Changed
+
+- `@hiaText` and `@hiaBlock` now act as compatibility inputs for the newer text i18n pipeline.
+- `@coderef` output is modeled as extra source references rather than the only source metadata entry point.
+- The default source preview range strategy is now `parser-js`.
+
 ## 0.1.0 - 2026-07-05
 
 ### Added
@@ -14,5 +30,5 @@
 
 ### Notes
 
-- This is a first internal planning-cycle release candidate.
+- This is an early public package for standalone JSDoc usage and HIA metadata experiments.
 - Public API stability is not guaranteed yet.

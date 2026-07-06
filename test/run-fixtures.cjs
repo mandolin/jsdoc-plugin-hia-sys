@@ -52,6 +52,7 @@ function runBasicFixture() {
   assert.equal(dictionary.tags.has("hiaLocale"), true);
   assert.equal(dictionary.tags.has("hiaKey"), true);
   assert.equal(dictionary.tags.has("hiaPath"), true);
+  assert.equal(dictionary.tags.has("lang"), true);
   assert.equal(dictionary.tags.has("hiaText"), true);
   assert.equal(dictionary.tags.has("hiaBlock"), true);
   assert.equal(dictionary.tags.has("codeblock"), true);
@@ -74,19 +75,37 @@ function runBasicFixture() {
     name: "greet",
     longname: "greet",
     description: "Greets a user.\n\n@coderef GREET_BODY",
+    params: [
+      {
+        name: "status",
+        description: "Status <lang key=\"greet.status\"><zh-CN>启用</zh-CN><en>active</en></lang>."
+      }
+    ],
     examples: ["// @coderef GREET_BODY"],
     properties: [
       {
         name: "helper",
         description: "Shared helper:\n@coderef SHARED_HELPER"
       }
-    ]
+    ],
+    meta: {
+      path: path.dirname(sourcePath),
+      filename: path.basename(sourcePath),
+      lineno: 17,
+      columnno: 1
+    }
   };
   const helperDoclet = {
     kind: "function",
     name: "normalizeName",
     longname: "normalizeName",
-    description: "Shared helper."
+    description: "Shared helper.",
+    meta: {
+      path: path.dirname(sharedSourcePath),
+      filename: path.basename(sharedSourcePath),
+      lineno: 13,
+      columnno: 1
+    }
   };
 
   dictionary.tags.get("hiaKey").onTagged(doclet, {
@@ -95,10 +114,10 @@ function runBasicFixture() {
   dictionary.tags.get("hiaPath").onTagged(doclet, {
     value: "api.greet"
   });
-  dictionary.tags.get("hiaText").onTagged(doclet, {
+  dictionary.tags.get("lang").onTagged(doclet, {
     value: "zh-CN 问候一个用户。"
   });
-  dictionary.tags.get("hiaText").onTagged(doclet, {
+  dictionary.tags.get("lang").onTagged(doclet, {
     value: "en Greets a user."
   });
   dictionary.tags.get("coderef").onTagged(doclet, {
@@ -133,6 +152,20 @@ function runBasicFixture() {
   assert.equal(doclet.hia.source.references.length, 4);
   assert.equal(doclet.hia.source.references.every((reference) => reference.resolved), true);
   assert.equal(doclet.hia.source.fragments.length, 4);
+  assert.equal(doclet.hia.source.model, "hia-jsdoc-source");
+  assert.equal(doclet.hia.source.modelVersion, "0.2.0");
+  assert.equal(doclet.hia.source.mode, "all");
+  assert.equal(doclet.hia.source.definedIn.kind, "defined-in");
+  assert.match(doclet.hia.source.definedIn.relativePath, /examples\/basic\/src\/greet\.js$/);
+  assert.equal(doclet.hia.source.definedIn.position.line, 17);
+  assert.equal(doclet.hia.source.definedIn.link.enabled, true);
+  assert.equal(doclet.hia.source.primaryBlock.kind, "primary-block");
+  assert.equal(doclet.hia.source.primaryBlock.rangeSource, "parser-js");
+  assert.equal(doclet.hia.source.primaryBlock.confidence, "high");
+  assert.match(doclet.hia.source.primaryBlock.content, /function greet/);
+  assert.equal(doclet.hia.source.primaryBlock.preview.enabled, true);
+  assert.equal(doclet.hia.source.references[0].kind, "source-reference");
+  assert.equal(doclet.hia.source.references[0].referenceKind, "coderef");
   assert.match(doclet.description, /```javascript/);
   assert.match(doclet.description, /const message = `Hello, \$\{name\}`;/);
   assert.match(doclet.examples[0], /return message;/);
@@ -144,7 +177,22 @@ function runBasicFixture() {
   assert.match(doclet.hia.source.references[0].fragment.preview.content, /return message;/);
   assert.equal(doclet.hia.i18n.key, "greet.description");
   assert.equal(doclet.hia.i18n.path, "api.greet");
+  assert.equal(doclet.hia.i18n.model, "hia-jsdoc-text-i18n");
+  assert.equal(doclet.hia.i18n.modelVersion, "0.2.0");
   assert.deepEqual(doclet.hia.i18n.locales, ["zh-CN", "en"]);
+  assert.equal(doclet.hia.i18n.fields.description.kind, "description");
+  assert.equal(doclet.hia.i18n.fields.description.blocks.length, 2);
+  assert.equal(doclet.hia.i18n.fields.description.localizedText["zh-CN"], "问候一个用户。");
+  assert.equal(doclet.hia.i18n.fields.description.localizedText.en, "Greets a user.");
+  assert.equal(
+    doclet.hia.i18n.fields["params.status.description"].localizedText["zh-CN"],
+    "Status 启用."
+  );
+  assert.equal(
+    doclet.hia.i18n.fields["params.status.description"].localizedText.en,
+    "Status active."
+  );
+  assert.equal(doclet.hia.i18n.fields["params.status.description"].segments.length, 1);
   assert.equal(doclet.hia.i18n.localized["zh-CN"].text, "问候一个用户。");
   assert.equal(doclet.hia.i18n.localized.en.text, "Greets a user.");
   assert.equal(doclet.hia.i18n.generation.mode, "runtimeSwitch");
@@ -155,8 +203,11 @@ function runBasicFixture() {
   assert.equal(doclet.hia.microPlugins.includes("doc-i18n"), true);
 
   assert.equal(helperDoclet.hia.i18n.key, "shared.helper");
+  assert.equal(helperDoclet.hia.i18n.localized["zh-CN"].text, "标准化用户名称。");
+  assert.equal(helperDoclet.hia.i18n.localized["zh-CN"].source, "resource");
   assert.equal(helperDoclet.hia.i18n.localized.en.text, "Normalizes a user name.");
   assert.equal(helperDoclet.hia.i18n.localized.en.source, "resource");
+  assert.equal(helperDoclet.hia.i18n.fields.description.localizedText["zh-CN"], "标准化用户名称。");
 
   const state = system.getState();
   assert.equal(state.sourceFiles.has(sourcePath), true);
@@ -210,10 +261,10 @@ function runOutputContractFixture() {
     dictionary.tags.get("hiaKey").onTagged(doclet, {
       value: "contract.demo"
     });
-    dictionary.tags.get("hiaText").onTagged(doclet, {
+    dictionary.tags.get("lang").onTagged(doclet, {
       value: "zh-CN 契约演示。"
     });
-    dictionary.tags.get("hiaText").onTagged(doclet, {
+    dictionary.tags.get("lang").onTagged(doclet, {
       value: "en Contract demo."
     });
 
@@ -235,6 +286,7 @@ function runOutputContractFixture() {
     assert.equal(written.contract, "hia-jsdoc-integration");
     assert.equal(written.mode, "hiaIntegration");
     assert.equal(written.ir.nodes[0].id, "jsdoc:function:contractDemo");
+    assert.equal(written.ir.nodes[0].i18n.fields.description.localizedText["zh-CN"], "契约演示。");
     assert.equal(written.ir.nodes[0].i18n.generation.perLocale.en.text, "Contract demo.");
     assert.equal(written.docletNodeMap[0].nodeId, "jsdoc:function:contractDemo");
     assert.equal(written.localizationResources.length, 0);

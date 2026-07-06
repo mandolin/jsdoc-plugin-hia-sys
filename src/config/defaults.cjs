@@ -14,6 +14,7 @@ const DEFAULT_CONFIG = Object.freeze({
   ],
   source: {
     basePath: "",
+    mode: "all",
     link: {
       enabled: false,
       rootUrl: "",
@@ -21,6 +22,14 @@ const DEFAULT_CONFIG = Object.freeze({
     },
     preview: {
       enabled: false,
+      defaultExpanded: false,
+      rangeStrategy: "parser-js",
+      contextLines: 0,
+      maxLines: 80,
+      maxScanLines: 40
+    },
+    references: {
+      enabled: true,
       defaultExpanded: false
     }
   },
@@ -84,8 +93,10 @@ function readJsdocEnvConfig() {
     return mergeConfig(
       conf.hia,
       conf["jsdoc-plugin-hia-sys"],
+      conf["@mandolin/jsdoc-plugin-hia-sys"],
       opts.hia,
-      opts["jsdoc-plugin-hia-sys"]
+      opts["jsdoc-plugin-hia-sys"],
+      opts["@mandolin/jsdoc-plugin-hia-sys"]
     );
   } catch (_error) {
     return {};

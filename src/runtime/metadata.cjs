@@ -12,8 +12,14 @@ function ensureDocletHia(doclet, state) {
       microPlugins: [],
       doclet: {},
       source: {
+        model: "hia-jsdoc-source",
+        modelVersion: "0.2.0",
+        mode: state.config.source.mode || "all",
+        definedIn: null,
+        primaryBlock: null,
         fragments: [],
-        references: []
+        references: [],
+        diagnostics: []
       },
       i18n: {},
       diagnostics: []

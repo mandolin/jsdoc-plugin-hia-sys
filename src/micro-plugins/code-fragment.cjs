@@ -1,6 +1,8 @@
 "use strict";
 
 const {
+  buildDefinedIn,
+  buildPrimaryBlock,
   buildSourceLink,
   buildSourcePreview,
   getLineColumn,
@@ -29,6 +31,7 @@ function createFragment(openMarker, closeMarker, source, filePath, context) {
   const startLine = openMarker.location.line + 1;
   const endLine = Math.max(startLine, closeMarker.location.line - 1);
   const fragment = {
+    kind: "source-fragment",
     id: openMarker.id,
     filePath,
     relativePath,
@@ -171,11 +174,13 @@ function scanSourceFragments(event, context) {
 
 function summarizeFragment(fragment) {
   return {
+    kind: fragment.kind || "source-fragment",
     id: fragment.id,
     filePath: fragment.filePath,
     relativePath: fragment.relativePath,
     language: fragment.language,
     range: fragment.range,
+    content: fragment.content,
     link: fragment.link,
     preview: fragment.preview
   };
@@ -184,6 +189,8 @@ function summarizeFragment(fragment) {
 function createReference(targetId, doclet, fieldPath, context) {
   const fragment = context.state.registries.sourceFragments.get(targetId);
   const reference = {
+    kind: "source-reference",
+    referenceKind: "coderef",
     targetId,
     sourceNodeId: doclet.longname || doclet.name || "",
     fieldPath,
@@ -343,8 +350,14 @@ module.exports = {
     }
 
     const metadata = context.markMicroPlugin(event.doclet, this.name);
+    metadata.source.model = "hia-jsdoc-source";
+    metadata.source.modelVersion = "0.2.0";
+    metadata.source.mode = context.config.source.mode || "all";
+    metadata.source.definedIn = buildDefinedIn(event.doclet, context);
+    metadata.source.primaryBlock = buildPrimaryBlock(event.doclet, context);
     metadata.source.fragments = metadata.source.fragments || [];
     metadata.source.references = metadata.source.references || [];
+    metadata.source.diagnostics = metadata.source.diagnostics || [];
   },
 
   parseComplete(event, context) {

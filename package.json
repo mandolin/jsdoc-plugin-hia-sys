@@ -1,7 +1,7 @@
 {
-  "name": "jsdoc-plugin-hia-sys",
+  "name": "@mandolin/jsdoc-plugin-hia-sys",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "HIA JSDoc integration system with internal micro-plugin support.",
   "license": "MIT",
   "repository": {
@@ -29,7 +29,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "check:syntax": "node --check src/index.cjs && node --check src/runtime/create-plugin-system.cjs && node --check src/runtime/diagnostics.cjs && node --check src/runtime/i18n.cjs && node --check src/runtime/metadata.cjs && node --check src/runtime/output-contract.cjs && node --check src/runtime/source.cjs && node --check src/micro-plugins/code-fragment.cjs && node --check src/micro-plugins/diagnostics.cjs && node --check src/micro-plugins/doc-i18n.cjs && node --check src/micro-plugins/doclet-normalizer.cjs && node --check src/micro-plugins/hia-ir-exporter.cjs && node --check src/micro-plugins/index.cjs && node --check src/micro-plugins/source-link.cjs && node --check src/micro-plugins/source-preview.cjs && node --check test/run-fixtures.cjs && node --check scripts/clean-generated.cjs && node --check scripts/release-check.cjs",
+    "check:syntax": "node --check src/index.cjs && node --check src/config/defaults.cjs && node --check src/runtime/create-plugin-system.cjs && node --check src/runtime/diagnostics.cjs && node --check src/runtime/i18n.cjs && node --check src/runtime/metadata.cjs && node --check src/runtime/output-contract.cjs && node --check src/runtime/source.cjs && node --check src/micro-plugins/code-fragment.cjs && node --check src/micro-plugins/diagnostics.cjs && node --check src/micro-plugins/doc-i18n.cjs && node --check src/micro-plugins/doclet-normalizer.cjs && node --check src/micro-plugins/hia-ir-exporter.cjs && node --check src/micro-plugins/index.cjs && node --check src/micro-plugins/source-link.cjs && node --check src/micro-plugins/source-preview.cjs && node --check test/run-fixtures.cjs && node --check scripts/clean-generated.cjs && node --check scripts/release-check.cjs",
     "clean:examples": "node scripts/clean-generated.cjs",
     "release:check": "node scripts/release-check.cjs && npm pack --dry-run",
     "test": "node test/run-fixtures.cjs",

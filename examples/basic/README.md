@@ -1,11 +1,11 @@
 # Basic Example
 
-This example verifies the first JPHS planning-cycle feature set:
+This example shows the core plugin features:
 
 - JSDoc plugin loading.
 - `@codeblock`, `@codeblockend` and `@coderef`.
-- Source link and source preview metadata.
-- Inline and resource-backed `doc-i18n`.
+- Source `definedIn`, `primaryBlock`, link and preview metadata.
+- `@lang`, `<lang>` inline segments and resource-backed `doc-i18n`.
 - HIA Integration JSON output.
 
 Run:
