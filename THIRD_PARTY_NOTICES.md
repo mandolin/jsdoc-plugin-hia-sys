@@ -14,6 +14,18 @@ This package has no bundled runtime dependency besides Node.js built-ins.
 
 - `jsdoc` `^4.0.5` (`Apache-2.0`)
 
+## License Audit
+
+Run the direct dependency audit before release:
+
+```bash
+npm run license:audit
+```
+
+Allowed direct dependency licenses are MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause and ISC. GPL, AGPL, LGPL, SSPL, BUSL and BSL-family licenses require explicit approval before use.
+
+New external dependencies must update this notice file, `package.json`, `scripts/check-license-audit.cjs` and `RELEASE_CHECKLIST.md`.
+
 ## Assets
 
 No third-party visual assets, fonts, images, or copied theme code are bundled.
