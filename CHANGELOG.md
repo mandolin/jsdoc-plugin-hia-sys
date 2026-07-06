@@ -15,6 +15,7 @@
 - `@hiaText` and `@hiaBlock` now act as compatibility inputs for the newer text i18n pipeline.
 - `@coderef` output is modeled as extra source references rather than the only source metadata entry point.
 - The default source preview range strategy is now `parser-js`.
+- Release metadata now declares public scoped publishing and records the publish strategy/checklist.
 
 ## 0.1.0 - 2026-07-05
 

@@ -6,13 +6,13 @@ This package has no bundled runtime dependency besides Node.js built-ins.
 
 ## Peer Dependencies
 
-- `jsdoc` `^4.0.0`
+- `jsdoc` `^4.0.0` (`Apache-2.0`)
 
 `jsdoc` is expected to be installed by the consuming project or used through this package's development environment.
 
 ## Development Dependencies
 
-- `jsdoc` `^4.0.5`
+- `jsdoc` `^4.0.5` (`Apache-2.0`)
 
 ## Assets
 

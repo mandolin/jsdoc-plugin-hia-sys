@@ -48,7 +48,11 @@ function run() {
   assert.equal(pkg.repository.url, "git+https://github.com/mandolin/jsdoc-plugin-hia-sys.git");
   assert.equal(pkg.bugs.url, "https://github.com/mandolin/jsdoc-plugin-hia-sys/issues");
   assert.equal(pkg.homepage, "https://github.com/mandolin/jsdoc-plugin-hia-sys#readme");
+  assert.equal(pkg.publishConfig?.access, "public");
   assert.equal(pkg.peerDependencies.jsdoc, "^4.0.0");
+  assert.ok(Array.isArray(pkg.keywords));
+  assert.ok(pkg.keywords.includes("jsdoc-plugin"));
+  assert.ok(pkg.keywords.includes("hia"));
   assert.ok(pkg.scripts.test);
   assert.ok(pkg.scripts["test:jsdoc"]);
   assert.ok(pkg.scripts["check:syntax"]);

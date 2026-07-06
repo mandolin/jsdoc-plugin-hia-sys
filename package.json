@@ -12,6 +12,9 @@
     "url": "https://github.com/mandolin/jsdoc-plugin-hia-sys/issues"
   },
   "homepage": "https://github.com/mandolin/jsdoc-plugin-hia-sys#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "src/index.cjs",
   "exports": {
     ".": "./src/index.cjs"
@@ -39,8 +42,11 @@
   },
   "keywords": [
     "jsdoc",
+    "jsdoc-plugin",
     "hia",
     "documentation",
+    "source-preview",
+    "i18n",
     "plugin"
   ],
   "peerDependencies": {

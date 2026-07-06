@@ -14,17 +14,25 @@ Version: `0.1.0`
 - [ ] `npm run clean:examples`
 - [ ] `npm run release:check`
 - [ ] `npm run test:all`
-- [ ] `npm pack --dry-run`
+- [ ] `npm pack --dry-run --json`
 
 ## Manual Review
 
 - [ ] README describes Standalone and HIA Integration use.
 - [ ] `examples/basic/README.md` explains the example.
-- [ ] `docs/contracts/jsdoc-hia-output-contract.md` matches current output shape.
+- [ ] `src/runtime/output-contract.cjs` matches current output shape.
 - [ ] `THIRD_PARTY_NOTICES.md` is current.
 - [ ] `CHANGELOG.md` has the target version.
+- [ ] `package.json` keeps `publishConfig.access` as `public`.
+- [ ] Dry-run artifact contents are limited to package sources, examples and release docs.
 - [ ] `examples/basic/out` is not present.
 - [ ] No `.tgz` dry-run tarball remains.
+
+## Publish Strategy
+
+- Keep version `0.1.0` for the first public package unless registry preflight shows it is already published.
+- Use `npm publish --access public` for the scoped package.
+- If publishing before W-P3.5 HIA Integration hardening, publish with `--tag next` and avoid promoting to `latest` until the integration producer contract is confirmed.
 
 ## Current Boundaries
 
