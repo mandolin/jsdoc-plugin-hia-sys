@@ -13,7 +13,7 @@
         "link": {
           "enabled": true,
           "rootUrl": "https://example.test/repo",
-          "openMode": "currentPage"
+          "openMode": "same-tab"
         },
         "preview": {
           "enabled": true,

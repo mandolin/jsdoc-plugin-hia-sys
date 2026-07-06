@@ -28,7 +28,7 @@ function runBasicFixture() {
         link: {
           enabled: true,
           rootUrl: "https://example.test/repo",
-          openMode: "currentPage"
+          openMode: "same-tab"
         },
         preview: {
           enabled: true,
@@ -222,8 +222,19 @@ function runBasicFixture() {
   assert.equal(state.output.standalone.theme.consumes.i18n, "doclet.hia.i18n");
   assert.equal(state.output.integration.contract, "hia-jsdoc-integration");
   assert.equal(state.output.integration.ir.nodes.length, 2);
+  assert.equal(new Set(state.output.integration.ir.nodes.map((node) => node.id)).size, 2);
   assert.equal(state.output.integration.docletNodeMap[0].docletId, "greet");
   assert.equal(state.output.integration.parserBoundary.adapter, "parser-jsdoc");
+  assert.equal(JSON.stringify(state.output.integration).includes("filePath"), false);
+  assert.equal(JSON.stringify(state.output.integration).includes("currentPage"), false);
+  assert.deepEqual(state.output.integration.localizationResources[0], {
+    kind: "external-resource",
+    path: "examples/basic/i18n/docs.hia-i18n.json",
+    format: "hia-i18n-json",
+    fields: ["shared.helper"],
+    locales: ["en", "zh-CN"],
+    localeCount: 2
+  });
   assert.deepEqual(state.output.diagnostics, []);
 }
 
@@ -290,6 +301,8 @@ function runOutputContractFixture() {
     assert.equal(written.ir.nodes[0].i18n.generation.perLocale.en.text, "Contract demo.");
     assert.equal(written.docletNodeMap[0].nodeId, "jsdoc:function:contractDemo");
     assert.equal(written.localizationResources.length, 0);
+    assert.equal(JSON.stringify(written).includes("filePath"), false);
+    assert.equal(JSON.stringify(written).includes("currentPage"), false);
     assert.equal(state.output.standalone.doclets[0].summary.hiaKey, "contract.demo");
     assert.equal(state.output.standalone.theme.i18n.mode, "perLocale");
   } finally {
@@ -376,6 +389,8 @@ function runDiagnosticsFixture() {
   });
 
   const codes = system.getState().output.diagnostics.map((item) => item.code);
+  const integrationDiagnostics = system.getState().output.integration.diagnostics;
+  const serializedIntegration = JSON.stringify(system.getState().output.integration);
 
   assert.equal(codes.includes("HIA_SOURCE_FRAGMENT_DUPLICATE"), true);
   assert.equal(codes.includes("HIA_SOURCE_FRAGMENT_END_MISSING"), true);
@@ -383,6 +398,10 @@ function runDiagnosticsFixture() {
   assert.equal(codes.includes("HIA_I18N_RESOURCE_MISSING"), true);
   assert.equal(codes.includes("HIA_I18N_INLINE_LOCALE_DUPLICATE"), true);
   assert.equal(codes.includes("HIA_I18N_LOCALE_MISSING"), true);
+  assert.equal(integrationDiagnostics.every((item) => item.targetPath && item.path), true);
+  assert.equal(integrationDiagnostics.every((item) => ["error", "warning", "info"].includes(item.severity)), true);
+  assert.equal(serializedIntegration.includes("filePath"), false);
+  assert.equal(serializedIntegration.includes("currentPage"), false);
   assert.equal(doclet.hia.source.references.length, 1);
   assert.equal(doclet.hia.source.references[0].resolved, false);
 }

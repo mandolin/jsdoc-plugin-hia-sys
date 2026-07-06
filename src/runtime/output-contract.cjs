@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { normalizeOpenMode } = require("./source.cjs");
 const { VERSION } = require("../version.cjs");
 
 const CONTRACT_VERSION = "0.1.0";
@@ -23,6 +24,185 @@ function getNodeId(doclet) {
   const rawId = getDocletId(doclet) || "anonymous";
   const kind = doclet.kind || "unknown";
   return `jsdoc:${kind}:${rawId}`;
+}
+
+function toArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function countI18nFieldContent(fields) {
+  if (!fields || typeof fields !== "object" || Array.isArray(fields)) {
+    return 0;
+  }
+
+  let count = 0;
+
+  for (const field of Object.values(fields)) {
+    if (!field || typeof field !== "object" || Array.isArray(field)) {
+      continue;
+    }
+
+    const localizedText = field.localizedText && typeof field.localizedText === "object"
+      ? field.localizedText
+      : {};
+
+    if (
+      field.defaultText ||
+      Object.values(localizedText).some(Boolean) ||
+      toArray(field.blocks).length > 0 ||
+      toArray(field.segments).length > 0
+    ) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+function scoreIntegrationNode(node) {
+  let score = 0;
+
+  if (node.summary) {
+    score += 100;
+  }
+
+  if (node.i18n && node.i18n.key) {
+    score += 80;
+  }
+
+  score += countI18nFieldContent(node.i18n && node.i18n.fields) * 20;
+  score += toArray(node.jsdoc && node.jsdoc.params).length * 10;
+  score += toArray(node.jsdoc && node.jsdoc.returns).length * 10;
+  score += toArray(node.jsdoc && node.jsdoc.properties).length * 8;
+  score += toArray(node.jsdoc && node.jsdoc.examples).length * 8;
+  score += toArray(node.source && node.source.references).length * 12;
+  score += toArray(node.diagnostics).length;
+
+  return score;
+}
+
+function hasIntegrationNodeContent(node) {
+  if (!node || !node.id || !node.name) {
+    return false;
+  }
+
+  if (node.kind === "package" && /undefined/.test(String(node.longname || node.name || ""))) {
+    return false;
+  }
+
+  return scoreIntegrationNode(node) > 0;
+}
+
+function buildIntegrationEntries(doclets, state) {
+  const result = [];
+  const indexesById = new Map();
+
+  for (const doclet of doclets) {
+    const node = toIntegrationNode(doclet, state);
+
+    if (!hasIntegrationNodeContent(node)) {
+      continue;
+    }
+
+    const existingIndex = indexesById.get(node.id);
+
+    if (existingIndex === undefined) {
+      indexesById.set(node.id, result.length);
+      result.push({
+        doclet,
+        node
+      });
+      continue;
+    }
+
+    if (scoreIntegrationNode(node) > scoreIntegrationNode(result[existingIndex].node)) {
+      result[existingIndex] = {
+        doclet,
+        node
+      };
+    }
+  }
+
+  return result;
+}
+
+function isUnsafePathLike(value) {
+  const text = String(value || "");
+
+  if (/^[A-Za-z]:[\\/]/.test(text) || /^\\\\/.test(text)) {
+    return true;
+  }
+
+  if (/^\/(?!\/)/.test(text) && !/^\/\//.test(text)) {
+    return true;
+  }
+
+  return text.split(/[\\/]/).includes("..");
+}
+
+function sanitizeIntegrationValue(value, key = "") {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => sanitizeIntegrationValue(item))
+      .filter((item) => item !== undefined);
+  }
+
+  if (value && typeof value === "object") {
+    const record = {};
+
+    for (const [itemKey, itemValue] of Object.entries(value)) {
+      if (/filePath$/i.test(itemKey)) {
+        continue;
+      }
+
+      const sanitized = sanitizeIntegrationValue(itemValue, itemKey);
+
+      if (sanitized !== undefined) {
+        record[itemKey] = sanitized;
+      }
+    }
+
+    return record;
+  }
+
+  if (key === "openMode") {
+    return normalizeOpenMode(value);
+  }
+
+  if (
+    typeof value === "string" &&
+    /(?:path|file|root|output)$/i.test(key) &&
+    isUnsafePathLike(value)
+  ) {
+    return undefined;
+  }
+
+  return value;
+}
+
+function normalizeDiagnostic(diagnostic, targetPath) {
+  const sanitized = sanitizeIntegrationValue(diagnostic || {});
+
+  return {
+    code: sanitized.code || "HIA0000",
+    severity: sanitized.severity === "error" || sanitized.severity === "warning" || sanitized.severity === "info"
+      ? sanitized.severity
+      : "warning",
+    message: sanitized.message || "Unknown HIA diagnostic.",
+    targetPath: sanitized.targetPath || sanitized.path || targetPath,
+    path: sanitized.path || sanitized.targetPath || targetPath,
+    plugin: sanitized.plugin || "core",
+    range: sanitized.range || null,
+    data: sanitized.data && typeof sanitized.data === "object" && !Array.isArray(sanitized.data)
+      ? sanitized.data
+      : null
+  };
+}
+
+function normalizeDiagnostics(diagnostics, targetPath) {
+  return toArray(diagnostics).map((diagnostic, index) => (
+    normalizeDiagnostic(diagnostic, `${targetPath}.${index}`)
+  ));
 }
 
 function summarizeDoclet(doclet, state) {
@@ -48,7 +228,7 @@ function summarizeDoclet(doclet, state) {
 function toIntegrationNode(doclet, state) {
   const metadata = getMetadata(doclet, state);
 
-  return {
+  const node = {
     id: getNodeId(doclet),
     kind: doclet.kind || "",
     name: doclet.name || "",
@@ -76,8 +256,10 @@ function toIntegrationNode(doclet, state) {
       references: []
     },
     i18n: metadata.i18n || {},
-    diagnostics: metadata.diagnostics || []
+    diagnostics: normalizeDiagnostics(metadata.diagnostics, `ir.nodes.${getNodeId(doclet)}.diagnostics`)
   };
+
+  return sanitizeIntegrationValue(node);
 }
 
 function buildDocletNodeMap(doclets) {
@@ -141,13 +323,16 @@ function buildStandaloneOutput(state, doclets) {
 }
 
 function buildIntegrationOutput(state, doclets) {
-  const nodes = doclets.map((doclet) => toIntegrationNode(doclet, state));
+  const integrationEntries = buildIntegrationEntries(doclets, state);
+  const nodes = integrationEntries.map((entry) => entry.node);
+  const integrationDoclets = integrationEntries.map((entry) => entry.doclet);
 
-  return {
+  return sanitizeIntegrationValue({
     contract: INTEGRATION_CONTRACT,
     contractVersion: CONTRACT_VERSION,
     pluginVersion: VERSION,
-    mode: state.config.mode,
+    mode: state.config.mode === "hiaIntegration" ? "hiaIntegration" : "standalone",
+    artifactKind: "hia-integration",
     parserBoundary: {
       adapter: "parser-jsdoc",
       owns: [
@@ -169,10 +354,10 @@ function buildIntegrationOutput(state, doclets) {
     },
     sourceFragments: state.output.sourceFragments || [],
     localizationResources: state.registries.localizationResources || [],
-    diagnostics: getDiagnostics(state),
+    diagnostics: normalizeDiagnostics(getDiagnostics(state), "diagnostics"),
     diagnosticCounts: state.output.diagnosticCounts || state.diagnostics.countBySeverity(),
-    docletNodeMap: buildDocletNodeMap(doclets)
-  };
+    docletNodeMap: buildDocletNodeMap(integrationDoclets)
+  });
 }
 
 function buildOutputContract(state, doclets) {

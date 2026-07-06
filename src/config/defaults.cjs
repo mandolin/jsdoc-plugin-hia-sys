@@ -18,7 +18,7 @@ const DEFAULT_CONFIG = Object.freeze({
     link: {
       enabled: false,
       rootUrl: "",
-      openMode: "currentPage"
+      openMode: "same-tab"
     },
     preview: {
       enabled: false,

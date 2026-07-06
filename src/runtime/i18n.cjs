@@ -39,6 +39,59 @@ function resolveResourcePath(resourcePath, config) {
   return path.resolve(basePath, resourcePath);
 }
 
+function toPosixPath(filePath) {
+  return String(filePath || "").split(path.sep).join("/");
+}
+
+function isSafeRelativePath(filePath) {
+  const text = toPosixPath(filePath);
+
+  return Boolean(text) &&
+    !path.isAbsolute(text) &&
+    !/^[A-Za-z]:\//.test(text) &&
+    !text.startsWith("/") &&
+    !text.startsWith("//") &&
+    !text.split("/").includes("..");
+}
+
+function getResourceRelativePath(absolutePath, resourcePath, config) {
+  if (isSafeRelativePath(resourcePath)) {
+    return toPosixPath(resourcePath);
+  }
+
+  const basePath =
+    config.i18n.resourceBasePath || config.source.basePath || process.cwd();
+  const relativePath = toPosixPath(path.relative(basePath, absolutePath));
+
+  if (isSafeRelativePath(relativePath)) {
+    return relativePath;
+  }
+
+  return path.basename(absolutePath);
+}
+
+function collectResourceFields(entries) {
+  const fields = new Set();
+
+  for (const localeEntries of Object.values(entries || {})) {
+    for (const [key, value] of Object.entries(localeEntries || {})) {
+      fields.add(key);
+
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const nestedFields = value.fields && typeof value.fields === "object"
+          ? Object.keys(value.fields)
+          : [];
+
+        for (const fieldPath of nestedFields) {
+          fields.add(fieldPath);
+        }
+      }
+    }
+  }
+
+  return Array.from(fields).sort();
+}
+
 function normalizeResourceData(data, absolutePath) {
   if (data && typeof data.locale === "string" && data.entries) {
     return {
@@ -83,7 +136,11 @@ function loadLocalizationResources(config, diagnostics) {
       );
 
       resources.push({
-        filePath: absolutePath,
+        kind: "external-resource",
+        path: getResourceRelativePath(absolutePath, resourcePath, config),
+        format: "hia-i18n-json",
+        fields: collectResourceFields(resource.entries),
+        locales: Object.keys(resource.entries).sort(),
         localeCount: Object.keys(resource.entries).length
       });
 

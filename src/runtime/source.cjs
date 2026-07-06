@@ -26,6 +26,20 @@ function inferLanguage(filePath) {
   return EXTENSION_LANGUAGE.get(path.extname(filePath).toLowerCase()) || "text";
 }
 
+function normalizeOpenMode(openMode) {
+  const value = String(openMode || "").trim();
+
+  if (value === "new-tab" || value === "newTab" || value === "external") {
+    return "new-tab";
+  }
+
+  if (value === "same-tab" || value === "sameTab" || value === "currentPage" || value === "current-page") {
+    return "same-tab";
+  }
+
+  return value || "same-tab";
+}
+
 function getRelativePath(filePath, config) {
   const basePath = config.source.basePath || process.cwd();
   return toPosixPath(path.relative(basePath, filePath));
@@ -109,13 +123,14 @@ function getLineColumn(source, index) {
 
 function buildSourceLink(fragment, config) {
   const linkConfig = config.source.link;
+  const openMode = normalizeOpenMode(linkConfig.openMode);
 
   if (!linkConfig.enabled || !linkConfig.rootUrl) {
     return {
       enabled: Boolean(linkConfig.enabled),
       fileUrl: "",
       lineUrl: "",
-      openMode: linkConfig.openMode
+      openMode
     };
   }
 
@@ -129,7 +144,7 @@ function buildSourceLink(fragment, config) {
     enabled: true,
     fileUrl,
     lineUrl: `${fileUrl}${lineHash}`,
-    openMode: linkConfig.openMode
+    openMode
   };
 }
 
@@ -525,6 +540,7 @@ module.exports = {
   getLineColumn,
   getRelativePath,
   inferLanguage,
+  normalizeOpenMode,
   resolveDocletSourceFile,
   toPosixPath,
   trimOneOuterNewline

@@ -1,6 +1,10 @@
 "use strict";
 
-const VALID_SEVERITIES = new Set(["error", "warning", "info", "hint"]);
+const VALID_SEVERITIES = new Set(["error", "warning", "info"]);
+
+function normalizeSeverity(severity) {
+  return severity === "hint" ? "info" : severity;
+}
 
 class DiagnosticsCollector {
   constructor() {
@@ -10,8 +14,8 @@ class DiagnosticsCollector {
   add(diagnostic) {
     const item = {
       code: diagnostic.code || "HIA0000",
-      severity: VALID_SEVERITIES.has(diagnostic.severity)
-        ? diagnostic.severity
+      severity: VALID_SEVERITIES.has(normalizeSeverity(diagnostic.severity))
+        ? normalizeSeverity(diagnostic.severity)
         : "warning",
       message: diagnostic.message || "Unknown HIA diagnostic.",
       plugin: diagnostic.plugin || "core",

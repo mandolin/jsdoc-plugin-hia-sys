@@ -193,6 +193,8 @@ Standalone mode enriches JSDoc doclets for themes and local tooling. HIA Integra
 
 The integration artifact currently contains IR nodes, source fragments, localization resources, diagnostics and a doclet-to-node map.
 
+Current integration output keeps user-facing doclets only, omitting empty JSDoc synthetic nodes created by module/export inference. Source links use `same-tab` or `new-tab`; legacy `currentPage` input is normalized when metadata is produced. Resource records use relative `external-resource` entries, and generated integration JSON does not expose local `filePath` values.
+
 ## Scripts
 
 ```bash

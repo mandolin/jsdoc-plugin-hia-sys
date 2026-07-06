@@ -16,6 +16,7 @@
 - `@coderef` output is modeled as extra source references rather than the only source metadata entry point.
 - The default source preview range strategy is now `parser-js`.
 - Release metadata now declares public scoped publishing and records the publish strategy/checklist.
+- HIA Integration output now omits empty synthetic doclets, normalizes source link open modes and emits relative localization resource records.
 
 ## 0.1.0 - 2026-07-05
 
