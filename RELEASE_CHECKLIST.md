@@ -12,9 +12,12 @@ Version: `0.1.0`
 - [ ] `npm test`
 - [ ] `npm run test:jsdoc`
 - [ ] `npm run clean:examples`
+- [ ] `npm run governance:check`
 - [ ] `npm run release:check`
 - [ ] `npm run test:all`
+- [ ] `npm run release:gate`
 - [ ] `npm pack --dry-run --json`
+- [ ] GitHub Actions CI has passed on Node.js 18.x and 20.x for the release commit.
 
 ## Manual Review
 
