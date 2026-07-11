@@ -135,7 +135,7 @@ Use `<lang>` inside any description text field:
 function greet(name) {}
 ```
 
-The plugin writes field-level data to `doclet.hia.i18n.fields`. For compatibility, it also keeps the older `doclet.hia.i18n.localized` and generation fields. `@hiaText` and `@hiaBlock` are still accepted as compatibility inputs.
+The plugin writes field-level data to `doclet.hia.i18n.fields`. During the output-model transition it also keeps the older `doclet.hia.i18n.localized` and generation fields. The canonical syntax for all new usage is `@lang` plus inline `<lang>`. The earlier `@hiaText` and `@hiaBlock` tags remain accepted as compatibility inputs and are not yet deprecated.
 
 External resource files are also supported:
 

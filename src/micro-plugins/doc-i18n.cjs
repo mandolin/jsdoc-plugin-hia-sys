@@ -737,6 +737,8 @@ module.exports = {
       }
     });
 
+    // 旧标签暂未弃用，仅用于兼容读取；新增文档必须使用 @lang / <lang>。
+    // Legacy tags are not deprecated yet and remain read-compatible; new docs must use @lang / <lang>.
     dictionary.defineTag("hiaText", {
       canHaveValue: true,
       onTagged(doclet, tag) {

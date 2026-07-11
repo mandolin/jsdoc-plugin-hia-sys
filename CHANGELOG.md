@@ -12,7 +12,7 @@
 
 ### Changed
 
-- `@hiaText` and `@hiaBlock` now act as compatibility inputs for the newer text i18n pipeline.
+- `@hiaText` and `@hiaBlock` remain available as compatibility inputs, while all new usage moves to canonical `@lang` and inline `<lang>`.
 - `@coderef` output is modeled as extra source references rather than the only source metadata entry point.
 - The default source preview range strategy is now `parser-js`.
 - Release metadata now declares public scoped publishing and records the publish strategy/checklist.
