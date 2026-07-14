@@ -1,6 +1,6 @@
 {
   "name": "@mandolin/jsdoc-plugin-hia-sys",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "HIA JSDoc integration system with internal micro-plugin support.",
   "license": "MIT",

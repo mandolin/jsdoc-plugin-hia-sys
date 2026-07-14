@@ -513,6 +513,28 @@ function findBlockForLocale(blocks, locale) {
   return null;
 }
 
+/**
+ * 返回所有内联片段都能直接提供的语言；找不到时让调用方沿用默认文本的回退逻辑。
+ *
+ * @param {Array<object>} segments 已解析的内联语言片段。
+ * @param {string} requestedLocale 当前请求语言。
+ * @param {object} config HIA i18n 配置。
+ * @returns {string} 直接覆盖全部片段的语言，或空字符串。
+ */
+function resolveInlineLocale(segments, requestedLocale, config) {
+  if (!segments.length) {
+    return "";
+  }
+
+  for (const candidate of buildFallbackChain(requestedLocale, config)) {
+    if (segments.every((segment) => Object.prototype.hasOwnProperty.call(segment.localized, candidate))) {
+      return candidate;
+    }
+  }
+
+  return "";
+}
+
 function resolveFieldText(fieldSeed, segments, requestedLocale, context) {
   const fallbackChain = buildFallbackChain(requestedLocale, context.config);
 
@@ -540,14 +562,18 @@ function resolveFieldText(fieldSeed, segments, requestedLocale, context) {
     context.config
   );
   const hasText = Boolean(rendered);
+  const resolvedInlineLocale = hasText
+    ? resolveInlineLocale(segments, requestedLocale, context.config)
+    : "";
+  const resolvedLocale = resolvedInlineLocale || (hasText ? context.config.i18n.defaultLocale : "");
 
   return {
     text: rendered,
     resolution: {
       requestedLocale,
-      resolvedLocale: hasText ? context.config.i18n.defaultLocale : "",
+      resolvedLocale,
       fallbackChain,
-      usedFallback: hasText && requestedLocale !== context.config.i18n.defaultLocale,
+      usedFallback: hasText && resolvedLocale !== requestedLocale,
       missing: !hasText
     }
   };
@@ -572,6 +598,13 @@ function createTextField(fieldSeed, context, doclet) {
   for (const block of fieldSeed.blocks) {
     if (block.locale) {
       directLocales.add(block.locale);
+    }
+  }
+
+  for (const segment of segments) {
+    for (const locale of Object.keys(segment.localized || {})) {
+      directLocales.add(locale);
+      directLocales.add(getParentLocale(locale));
     }
   }
 

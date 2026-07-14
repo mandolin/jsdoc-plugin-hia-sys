@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 - 2026-07-15
+
+### Fixed
+
+- Mark `<lang>` field translations as direct locale coverage and preserve their actual resolution in generated metadata.
+
 ## Unreleased
 
 ### Added

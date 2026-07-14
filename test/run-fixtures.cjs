@@ -144,7 +144,7 @@ function runBasicFixture() {
   });
 
   assert.ok(doclet.hia);
-  assert.equal(doclet.hia.version, "0.1.0");
+  assert.equal(doclet.hia.version, "0.1.1");
   assert.equal(doclet.hia.mode, "standalone");
   assert.equal(doclet.hia.doclet.name, "greet");
   assert.equal(doclet.hia.source.link.enabled, true);
@@ -193,6 +193,9 @@ function runBasicFixture() {
     "Status active."
   );
   assert.equal(doclet.hia.i18n.fields["params.status.description"].segments.length, 1);
+  assert.equal(doclet.hia.i18n.fields["params.status.description"].resolutions.en.resolvedLocale, "en");
+  assert.equal(doclet.hia.i18n.fields["params.status.description"].resolutions.en.usedFallback, false);
+  assert.deepEqual(doclet.hia.i18n.fields["params.status.description"].missingLocales, []);
   assert.equal(doclet.hia.i18n.localized["zh-CN"].text, "问候一个用户。");
   assert.equal(doclet.hia.i18n.localized.en.text, "Greets a user.");
   assert.equal(doclet.hia.i18n.generation.mode, "runtimeSwitch");

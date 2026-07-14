@@ -215,7 +215,7 @@ npm run test:all
 
 ## Stability
 
-Version `0.1.0` is an early public package. The Standalone metadata shape is intended for experimentation and companion-theme use. The HIA Integration IR is still a draft contract and may change before a stable release.
+Version `0.1.x` is an early public package. The Standalone metadata shape is intended for experimentation and companion-theme use. The HIA Integration IR is still a draft contract and may change before a stable release.
 
 ## License
 
