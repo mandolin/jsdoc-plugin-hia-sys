@@ -144,7 +144,7 @@ function runBasicFixture() {
   });
 
   assert.ok(doclet.hia);
-  assert.equal(doclet.hia.version, "0.1.1");
+  assert.equal(doclet.hia.version, "0.1.2");
   assert.equal(doclet.hia.mode, "standalone");
   assert.equal(doclet.hia.doclet.name, "greet");
   assert.equal(doclet.hia.source.link.enabled, true);
@@ -316,6 +316,68 @@ function runOutputContractFixture() {
   }
 }
 
+function runArrowExpressionSourceFixture() {
+  const dictionary = createDictionaryMock();
+  const system = plugin._hia.createPluginSystem({
+    microPlugins: plugin._hia.builtInMicroPlugins,
+    configOverrides: {
+      source: {
+        preview: {
+          enabled: true,
+          rangeStrategy: "parser-js"
+        }
+      }
+    }
+  });
+  const sourcePath = path.resolve(__dirname, "../examples/basic/src/arrow-expression-fixture.js");
+  const source = [
+    "/** Builds processors. */",
+    "const postcssProcessors = () => [",
+    "  require('postcss-url')({ url: 'inline' })",
+    "];",
+    "",
+    "/** Builds styles. */",
+    "const sasscss = () => {",
+    "  return true;",
+    "};"
+  ].join("\n");
+  const doclet = {
+    kind: "function",
+    name: "postcssProcessors",
+    longname: "postcssProcessors",
+    description: "Builds processors.",
+    meta: {
+      path: path.dirname(sourcePath),
+      filename: path.basename(sourcePath),
+      lineno: 1,
+      columnno: 1
+    }
+  };
+
+  system.defineTags(dictionary);
+  system.handle("beforeParse", {
+    filename: sourcePath,
+    source
+  });
+  system.handle("newDoclet", {
+    doclet
+  });
+
+  assert.equal(doclet.hia.source.primaryBlock.rangeSource, "parser-js");
+  assert.equal(doclet.hia.source.primaryBlock.range.start.line, 2);
+  assert.equal(doclet.hia.source.primaryBlock.range.end.line, 4);
+  assert.equal(doclet.hia.source.primaryBlock.confidence, "medium");
+  assert.equal(
+    doclet.hia.source.primaryBlock.content,
+    [
+      "const postcssProcessors = () => [",
+      "  require('postcss-url')({ url: 'inline' })",
+      "];"
+    ].join("\n")
+  );
+  assert.equal(doclet.hia.source.primaryBlock.content.includes("Builds styles"), false);
+}
+
 function runDiagnosticsFixture() {
   const dictionary = createDictionaryMock();
   const system = plugin._hia.createPluginSystem({
@@ -417,6 +479,7 @@ assert.equal(typeof plugin.handlers.processingComplete, "function");
 
 runBasicFixture();
 runOutputContractFixture();
+runArrowExpressionSourceFixture();
 runDiagnosticsFixture();
 
 console.log("G-JPHS-P5 fixtures passed.");

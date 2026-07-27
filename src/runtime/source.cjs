@@ -361,6 +361,46 @@ function findBalancedJsBlockEnd(lines, startIndex, maxLines) {
   return -1;
 }
 
+/**
+ * 判断声明是否在语句结束前出现顶层花括号块。
+ *
+ * @lang zh-CN 只有不位于圆括号或方括号内部的花括号才视为函数、类或对象声明块，避免把箭头函数返回数组中的对象字面量误判为函数体。
+ * @lang en Treats only braces outside parentheses and brackets as declaration blocks, preventing object literals inside an array-returning arrow expression from being mistaken for the function body.
+ */
+function hasJsOpeningBraceBeforeStatementEnd(lines, startIndex, maxLines) {
+  const limit = Math.min(lines.length - 1, startIndex + maxLines - 1);
+  let parenBalance = 0;
+  let bracketBalance = 0;
+
+  for (let index = startIndex; index <= limit; index += 1) {
+    const stripped = stripStringsAndLineComments(lines[index]);
+
+    for (const char of stripped) {
+      if (char === "(") {
+        parenBalance += 1;
+      } else if (char === ")") {
+        parenBalance -= 1;
+      } else if (char === "[") {
+        bracketBalance += 1;
+      } else if (char === "]") {
+        bracketBalance -= 1;
+      } else if (char === "{" && parenBalance <= 0 && bracketBalance <= 0) {
+        return true;
+      }
+    }
+
+    if (parenBalance <= 0 && bracketBalance <= 0 && /;\s*$/.test(stripped)) {
+      return false;
+    }
+
+    if (index > startIndex && /^\s*$/.test(lines[index])) {
+      return false;
+    }
+  }
+
+  return false;
+}
+
 function findJsStatementEnd(lines, startIndex, maxLines) {
   const limit = Math.min(lines.length - 1, startIndex + maxLines - 1);
   let parenBalance = 0;
@@ -400,7 +440,9 @@ function inferJsParserRange(lines, startIndex, maxLines, maxScanLines, doclet) {
     return null;
   }
 
-  const blockEndIndex = findBalancedJsBlockEnd(lines, declarationIndex, maxLines);
+  const blockEndIndex = hasJsOpeningBraceBeforeStatementEnd(lines, declarationIndex, maxLines)
+    ? findBalancedJsBlockEnd(lines, declarationIndex, maxLines)
+    : -1;
   const endIndex = blockEndIndex >= 0
     ? blockEndIndex
     : findJsStatementEnd(lines, declarationIndex, maxLines);

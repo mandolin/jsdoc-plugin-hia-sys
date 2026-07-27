@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 - 2026-07-27
+
+### Fixed
+
+- Stop JavaScript primary-block inference from treating object literals inside array-returning arrow expressions as function bodies.
+- Keep the inferred source range bounded to the declaration statement instead of consuming the following JSDoc block.
+
 ## 0.1.1 - 2026-07-15
 
 ### Fixed

@@ -4,7 +4,7 @@
 
 Package: `@mandolin/jsdoc-plugin-hia-sys`
 
-Version: `0.1.1`
+Version: `0.1.2`
 
 ## Required Checks
 
@@ -35,7 +35,7 @@ Version: `0.1.1`
 
 ## Publish Strategy
 
-- Publish version `0.1.1` as the compatible inline field-i18n maintenance release.
+- Publish version `0.1.2` as the compatible source-range maintenance release.
 - Use `npm publish --access public` for the scoped package.
 - If publishing before W-P3.5 HIA Integration hardening, publish with `--tag next` and avoid promoting to `latest` until the integration producer contract is confirmed.
 
