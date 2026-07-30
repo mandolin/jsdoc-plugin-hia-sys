@@ -123,6 +123,13 @@ and does not prescribe HTML structure. Consumers must tolerate a missing or an
 unknown profile version. JTH uses it as a same-page navigation hint and falls
 back to plain JSDoc `memberof` when the profile is absent.
 
+For the `0.1.x` JPHS/JTH pair, a compatible consumer may use the hint only
+when `identity.kind` and `identity.longname` match the current JSDoc doclet and
+`stableId` is exactly `jsdoc:${kind}:${longname}`. A stale or malformed hint is
+ignored, so the consumer can retain its ordinary JSDoc `memberof` fallback.
+The companion `stableId` is metadata identity; it does not replace a theme's
+own public HTML fragment-anchor compatibility surface.
+
 ## Multilingual Metadata
 
 Use `@lang` for localized doclet descriptions:
