@@ -205,10 +205,22 @@ function normalizeDiagnostics(diagnostics, targetPath) {
   ));
 }
 
+/**
+ * 构造 standalone theme 可消费的摘要，不把 companion profile 扩展为 HTML contract。
+ * Builds a standalone-theme summary without extending the companion profile
+ * into an HTML contract.
+ *
+ * @param {object} doclet JSDoc 文档节点 / JSDoc documentation node.
+ * @param {object} state 插件状态 / Plugin state.
+ * @returns {object} public summary / 公开摘要.
+ */
 function summarizeDoclet(doclet, state) {
   const metadata = getMetadata(doclet, state);
   const source = metadata.source || {};
   const i18n = metadata.i18n || {};
+  const presentation = metadata.presentation || {};
+  const presentationIdentity = presentation.identity || {};
+  const presentationNavigation = presentation.navigation || {};
 
   return {
     id: getDocletId(doclet),
@@ -221,10 +233,21 @@ function summarizeDoclet(doclet, state) {
     hiaPath: i18n.path || "",
     sourceReferenceCount: Array.isArray(source.references) ? source.references.length : 0,
     locales: Array.isArray(i18n.locales) ? i18n.locales : [],
-    hasHia: Boolean(metadata.version)
+    hasHia: Boolean(metadata.version),
+    presentationStableId: presentationIdentity.stableId || "",
+    presentationParentLongname: presentationNavigation.parentLongname || ""
   };
 }
 
+/**
+ * 投影 integration IR node，并以 additive profile 传递 presentation hint。
+ * Projects an integration IR node and carries the presentation hint as an
+ * additive profile.
+ *
+ * @param {object} doclet JSDoc 文档节点 / JSDoc documentation node.
+ * @param {object} state 插件状态 / Plugin state.
+ * @returns {object} sanitized integration node / 已清洗的 integration node.
+ */
 function toIntegrationNode(doclet, state) {
   const metadata = getMetadata(doclet, state);
 
@@ -249,7 +272,11 @@ function toIntegrationNode(doclet, state) {
     },
     hia: {
       metadataKey: state.config.metadataKey || "hia",
-      microPlugins: metadata.microPlugins || []
+      microPlugins: metadata.microPlugins || [],
+      // Presentation profile 与 JTH HTML 结构解耦，consumer 可安全忽略未知版本。
+      // The presentation profile is decoupled from JTH HTML structure; consumers
+      // may safely ignore an unknown version.
+      presentation: metadata.presentation || null
     },
     source: metadata.source || {
       fragments: [],
@@ -280,6 +307,15 @@ function getDiagnostics(state) {
   return state.diagnostics.list();
 }
 
+/**
+ * 声明 standalone theme 的 metadata consumption surface，其中 presentation 仍为可选。
+ * Declares the standalone theme metadata consumption surface, where
+ * presentation remains optional.
+ *
+ * @param {object} state 插件状态 / Plugin state.
+ * @param {Array<object>} doclets JSDoc 文档节点 / JSDoc documentation nodes.
+ * @returns {object} theme contract descriptor / theme contract 描述对象.
+ */
 function buildThemeContract(state, doclets) {
   return {
     name: "jsdoc-theme-hia",
@@ -291,6 +327,7 @@ function buildThemeContract(state, doclets) {
       sourceReferences: "doclet.hia.source.references",
       sourceFragments: "doclet.hia.source.fragments",
       i18n: "doclet.hia.i18n",
+      presentation: "doclet.hia.presentation",
       diagnostics: "doclet.hia.diagnostics"
     },
     i18n: {

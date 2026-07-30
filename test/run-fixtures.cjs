@@ -144,9 +144,24 @@ function runBasicFixture() {
   });
 
   assert.ok(doclet.hia);
-  assert.equal(doclet.hia.version, "0.1.2");
+  assert.equal(doclet.hia.version, "0.1.3");
   assert.equal(doclet.hia.mode, "standalone");
   assert.equal(doclet.hia.doclet.name, "greet");
+  assert.deepEqual(doclet.hia.presentation, {
+    model: "hia-jsdoc-presentation",
+    modelVersion: "0.1.0",
+    identity: {
+      stableId: "jsdoc:function:greet",
+      kind: "function",
+      longname: "greet"
+    },
+    navigation: {
+      parentLongname: "",
+      group: "function"
+    }
+  });
+  assert.equal(JSON.stringify(doclet.hia.presentation).includes(sourcePath), false);
+  assert.equal(JSON.stringify(doclet.hia.presentation).includes("filePath"), false);
   assert.equal(doclet.hia.source.link.enabled, true);
   assert.equal(doclet.hia.source.preview.enabled, true);
   assert.equal(doclet.hia.source.references.length, 4);
@@ -223,6 +238,7 @@ function runBasicFixture() {
   assert.equal(state.output.standalone.contract, "jsdoc-plugin-hia-sys/standalone");
   assert.equal(state.output.standalone.theme.metadataKey, "hia");
   assert.equal(state.output.standalone.theme.consumes.i18n, "doclet.hia.i18n");
+  assert.equal(state.output.standalone.theme.consumes.presentation, "doclet.hia.presentation");
   assert.equal(state.output.integration.contract, "hia-jsdoc-integration");
   assert.equal(state.output.integration.ir.nodes.length, 2);
   assert.equal(new Set(state.output.integration.ir.nodes.map((node) => node.id)).size, 2);
@@ -268,6 +284,7 @@ function runOutputContractFixture() {
       kind: "function",
       name: "contractDemo",
       longname: "contractDemo",
+      memberof: "module:contract",
       description: "Contract demo."
     };
 
@@ -302,10 +319,24 @@ function runOutputContractFixture() {
     assert.equal(written.ir.nodes[0].id, "jsdoc:function:contractDemo");
     assert.equal(written.ir.nodes[0].i18n.fields.description.localizedText["zh-CN"], "契约演示。");
     assert.equal(written.ir.nodes[0].i18n.generation.perLocale.en.text, "Contract demo.");
+    assert.deepEqual(written.ir.nodes[0].hia.presentation, {
+      model: "hia-jsdoc-presentation",
+      modelVersion: "0.1.0",
+      identity: {
+        stableId: "jsdoc:function:contractDemo",
+        kind: "function",
+        longname: "contractDemo"
+      },
+      navigation: {
+        parentLongname: "module:contract",
+        group: "function"
+      }
+    });
     assert.equal(written.docletNodeMap[0].nodeId, "jsdoc:function:contractDemo");
     assert.equal(written.localizationResources.length, 0);
     assert.equal(JSON.stringify(written).includes("filePath"), false);
     assert.equal(JSON.stringify(written).includes("currentPage"), false);
+    assert.equal(JSON.stringify(written.ir.nodes[0].hia.presentation).includes("nav-tree"), false);
     assert.equal(state.output.standalone.doclets[0].summary.hiaKey, "contract.demo");
     assert.equal(state.output.standalone.theme.i18n.mode, "perLocale");
   } finally {

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 - 2026-07-30
+
+### Added
+
+- Optional `hia-jsdoc-presentation@0.1.0` metadata for deterministic JSDoc identity and same-page containment hints consumed by companion themes.
+- Presentation metadata projection in standalone and HIA Integration output without coupling to HTML structure.
+
 ## 0.1.2 - 2026-07-27
 
 ### Fixed

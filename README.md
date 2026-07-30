@@ -110,6 +110,19 @@ function greet(name) {}
 
 The plugin writes reference data to `doclet.hia.source.references`, including source link and preview metadata when enabled.
 
+## Presentation Metadata
+
+Version `0.1.3` adds the optional JPHS/JTH companion profile at
+`doclet.hia.presentation`. It contains a deterministic `stableId`, a public
+`parentLongname` and a navigation group derived only from JSDoc `kind`,
+`longname` and `memberof`.
+
+The profile is additive and intended for companion themes. It does not define
+inheritance or composition, does not expose file paths/source bodies/AST data,
+and does not prescribe HTML structure. Consumers must tolerate a missing or an
+unknown profile version. JTH uses it as a same-page navigation hint and falls
+back to plain JSDoc `memberof` when the profile is absent.
+
 ## Multilingual Metadata
 
 Use `@lang` for localized doclet descriptions:
@@ -191,7 +204,7 @@ Standalone mode enriches JSDoc doclets for themes and local tooling. HIA Integra
 }
 ```
 
-The integration artifact currently contains IR nodes, source fragments, localization resources, diagnostics and a doclet-to-node map.
+The integration artifact currently contains IR nodes, source fragments, localization resources, diagnostics, a doclet-to-node map and the optional presentation hint.
 
 Current integration output keeps user-facing doclets only, omitting empty JSDoc synthetic nodes created by module/export inference. Source links use `same-tab` or `new-tab`; legacy `currentPage` input is normalized when metadata is produced. Resource records use relative `external-resource` entries, and generated integration JSON does not expose local `filePath` values.
 
@@ -212,6 +225,7 @@ npm run test:all
 - Node.js 18 or newer.
 - JSDoc 4.x.
 - CommonJS runtime.
+- `doclet.hia.presentation` is an additive `hia-jsdoc-presentation@0.1.0` companion profile; it is not a language-neutral HIA core contract.
 
 ## Stability
 

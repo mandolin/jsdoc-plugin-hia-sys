@@ -2,6 +2,15 @@
 
 const { VERSION } = require("../version.cjs");
 
+/**
+ * 初始化 HIA metadata 容器，并为 companion presentation profile 保留显式空位。
+ * Initializes the HIA metadata container and reserves an explicit slot for the
+ * companion presentation profile.
+ *
+ * @param {object} doclet JSDoc 文档节点 / JSDoc documentation node.
+ * @param {object} state 插件状态 / Plugin state.
+ * @returns {object} 可写的 HIA metadata / Writable HIA metadata.
+ */
 function ensureDocletHia(doclet, state) {
   const key = state.config.metadataKey || "hia";
 
@@ -21,6 +30,7 @@ function ensureDocletHia(doclet, state) {
         references: [],
         diagnostics: []
       },
+      presentation: null,
       i18n: {},
       diagnostics: []
     };
