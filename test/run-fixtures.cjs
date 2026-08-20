@@ -239,6 +239,25 @@ function runBasicFixture() {
   assert.equal(state.output.standalone.theme.metadataKey, "hia");
   assert.equal(state.output.standalone.theme.consumes.i18n, "doclet.hia.i18n");
   assert.equal(state.output.standalone.theme.consumes.presentation, "doclet.hia.presentation");
+  assert.deepEqual(state.output.standalone.theme.presentationProfile, {
+    contract: "documentation-presentation-profile",
+    contractVersion: "0.1.0-draft",
+    role: "producer-metadata-handoff",
+    defaults: {
+      pageMode: "multi-page",
+      sourceMode: "fetch",
+      fallbackPolicy: "none"
+    },
+    selection: {
+      pageMode: "multi-page",
+      sourceMode: "fetch",
+      fallbackPolicy: "none"
+    },
+    owns: ["doclet-metadata", "source-metadata", "text-i18n-metadata"],
+    handsOff: ["page-partition", "route-map", "source-reader", "theme-skin"]
+  });
+  assert.equal(JSON.stringify(state.output.standalone.theme.presentationProfile).includes("sourceBody"), false);
+  assert.equal(JSON.stringify(state.output.standalone.theme.presentationProfile).includes("css"), false);
   assert.equal(state.output.integration.contract, "hia-jsdoc-integration");
   assert.equal(state.output.integration.ir.nodes.length, 2);
   assert.equal(new Set(state.output.integration.ir.nodes.map((node) => node.id)).size, 2);

@@ -42,6 +42,19 @@ const DEFAULT_CONFIG = Object.freeze({
     resourceBasePath: "",
     resources: []
   },
+  /**
+   * @lang zh-CN
+   * 声明交给 standalone renderer 的中性呈现偏好；JPHS 只传递 metadata，不拥有页面、源码 reader 或皮肤实现。
+   *
+   * @lang en
+   * Declares neutral presentation preferences handed to a standalone renderer; JPHS carries metadata and owns no page,
+   * source-reader, or skin implementation.
+   */
+  presentation: {
+    pageMode: "multi-page",
+    sourceMode: "fetch",
+    fallbackPolicy: "none"
+  },
   diagnostics: {
     throwOnError: false
   },

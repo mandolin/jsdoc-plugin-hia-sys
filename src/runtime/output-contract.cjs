@@ -9,6 +9,29 @@ const CONTRACT_VERSION = "0.1.0";
 const STANDALONE_CONTRACT = "jsdoc-plugin-hia-sys/standalone";
 const INTEGRATION_CONTRACT = "hia-jsdoc-integration";
 
+/**
+ * @lang zh-CN
+ * 标识 JPHS/JTH 共同采用的 renderer-neutral presentation contract；JPHS 不在本仓复制其 validator。
+ *
+ * @lang en
+ * Identifies the renderer-neutral presentation contract adopted by JPHS/JTH; JPHS does not duplicate its validator here.
+ */
+const PRESENTATION_PROFILE_CONTRACT = "documentation-presentation-profile";
+
+/**
+ * @lang zh-CN
+ * 固定 draft exact-match 版本；未知版本必须由 renderer fail closed。
+ *
+ * @lang en
+ * Pins the exact-match draft version; a renderer must fail closed on an unknown version.
+ */
+const PRESENTATION_PROFILE_CONTRACT_VERSION = "0.1.0-draft";
+
+/** @lang zh-CN 允许传递的页面模式闭集。 @lang en Closed page-mode set accepted for handoff. */
+const PRESENTATION_PAGE_MODES = new Set(["multi-page", "single-page"]);
+/** @lang zh-CN 允许传递的源码模式闭集。 @lang en Closed source-mode set accepted for handoff. */
+const PRESENTATION_SOURCE_MODES = new Set(["fetch", "embed", "link", "none"]);
+
 function getMetadata(doclet, state) {
   const key = state.config.metadataKey || "hia";
   return doclet && doclet[key] && typeof doclet[key] === "object"
@@ -308,6 +331,48 @@ function getDiagnostics(state) {
 }
 
 /**
+ * @lang zh-CN
+ * 构造 JPHS 到 standalone renderer 的中性呈现 handoff。该 descriptor 只声明 contract identity、偏好和 owner 边界，
+ * 不是完整 neutral profile，也不包含 DOM、CSS、源码正文或 runtime callback。
+ *
+ * @lang en
+ * Builds the neutral presentation handoff from JPHS to a standalone renderer. This descriptor declares only contract
+ * identity, preferences, and owner boundaries; it is not the complete neutral profile and contains no DOM, CSS, source
+ * body, or runtime callback.
+ *
+ * @param {object} state 插件状态。 / Plugin state.
+ * @returns {object} 可公开序列化的 owner handoff descriptor。 / Publicly serializable owner handoff descriptor.
+ */
+function buildPresentationHandoff(state) {
+  // <lang><zh-CN>只接受 object-shaped 配置；异常输入采用冻结的规范默认值。</zh-CN><en>Accept only object-shaped configuration; malformed input uses the frozen normative defaults.</en></lang>
+  const configured = state.config.presentation && typeof state.config.presentation === "object"
+    ? state.config.presentation
+    : {};
+  // <lang><zh-CN>页面模式只在闭集中传递，避免 producer 暗示 renderer 支持未知 partition。</zh-CN><en>Carry a page mode only from the closed set so the producer never implies support for an unknown partition.</en></lang>
+  const pageMode = PRESENTATION_PAGE_MODES.has(configured.pageMode) ? configured.pageMode : "multi-page";
+  // <lang><zh-CN>源码模式与正文 capability 分开；此字段不会授权 JPHS 或 renderer 主动读取源码。</zh-CN><en>Keep source mode separate from body capability; this field authorizes neither JPHS nor the renderer to read source.</en></lang>
+  const sourceMode = PRESENTATION_SOURCE_MODES.has(configured.sourceMode) ? configured.sourceMode : "fetch";
+
+  return {
+    contract: PRESENTATION_PROFILE_CONTRACT,
+    contractVersion: PRESENTATION_PROFILE_CONTRACT_VERSION,
+    role: "producer-metadata-handoff",
+    defaults: {
+      pageMode: "multi-page",
+      sourceMode: "fetch",
+      fallbackPolicy: "none"
+    },
+    selection: {
+      pageMode,
+      sourceMode,
+      fallbackPolicy: "none"
+    },
+    owns: ["doclet-metadata", "source-metadata", "text-i18n-metadata"],
+    handsOff: ["page-partition", "route-map", "source-reader", "theme-skin"]
+  };
+}
+
+/**
  * 声明 standalone theme 的 metadata consumption surface，其中 presentation 仍为可选。
  * Declares the standalone theme metadata consumption surface, where
  * presentation remains optional.
@@ -330,6 +395,7 @@ function buildThemeContract(state, doclets) {
       presentation: "doclet.hia.presentation",
       diagnostics: "doclet.hia.diagnostics"
     },
+    presentationProfile: buildPresentationHandoff(state),
     i18n: {
       defaultLocale: state.config.i18n.defaultLocale,
       fallbackLocale: state.config.i18n.fallbackLocale,
@@ -444,10 +510,13 @@ function writeIntegrationOutput(state, integrationOutput) {
 module.exports = {
   CONTRACT_VERSION,
   INTEGRATION_CONTRACT,
+  PRESENTATION_PROFILE_CONTRACT,
+  PRESENTATION_PROFILE_CONTRACT_VERSION,
   STANDALONE_CONTRACT,
   buildIntegrationOutput,
   buildOutputContract,
   buildStandaloneOutput,
+  buildPresentationHandoff,
   buildThemeContract,
   writeIntegrationOutput
 };
