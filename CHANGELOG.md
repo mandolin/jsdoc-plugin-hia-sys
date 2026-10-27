@@ -4,6 +4,7 @@
 
 - Declare the current neutral presentation identity in the metadata handoff. The descriptor remains distinct from a complete profile or source publication consent; package versions and published archives are unchanged.
 - Add a default-off independent `doc-source-map@1.1.0` sidecar paired to final integration nodes. Only verified native JSDoc AST ranges carry exclusive UTF-16 coordinates; unverifiable nodes retain range-free entries, and the legacy integration output is unchanged.
+- Preserve full declaration ranges for JSDoc 4.0.5 assignment, object-property, variable, and default-export wrappers when the selected inner AST node directly belongs to the original wrapper. Same-endpoint guesses and virtual doclets remain range-free.
 
 ## 0.1.3 - 2026-07-30
 

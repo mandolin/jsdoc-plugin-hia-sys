@@ -133,6 +133,33 @@ function positionAt(source, offset) {
 }
 
 /**
+ * @lang zh-CN 核对 JSDoc 4.0.5 原生 visitor 原始声明与 getInfo 内部值之间的直接 AST 归属关系。
+ * @lang en Verifies direct AST ownership between JSDoc 4.0.5's original visitor declaration and getInfo's inner value.
+ * @param {object} node 选中 doclet 实际持有的内部 AST 节点。 / Inner AST node held by the selected doclet.
+ * @param {number} start 原始声明 UTF-16 起点。 / UTF-16 start of the original declaration.
+ * @param {number} end 原始声明 UTF-16 排除终点。 / Exclusive UTF-16 end of the original declaration.
+ * @param {string} eventNodeId JSDoc 原始 symbolFound 事件的节点标识。 / Node identity of the original JSDoc symbolFound event.
+ * @returns {boolean} 是否可将 meta 区间证明为同一原始包装节点。 / Whether the metadata range is proven to belong to the same original wrapper node.
+ */
+function isNativeWrapperRange(node, start, end, eventNodeId) {
+  // <lang><zh-CN>getInfo 仅对这四种 visitor 节点返回内部子节点；其它父子或同端点关系不放宽。</zh-CN><en>getInfo returns an inner child for only these four visitor nodes; other ancestry or shared endpoints do not widen precision.</en></lang>
+  const parent = node.parent;
+  let childSlot;
+  switch (parent?.type) {
+    case "AssignmentExpression": childSlot = "right"; break;
+    case "Property": childSlot = "value"; break;
+    case "VariableDeclarator": childSlot = "init"; break;
+    case "ExportDefaultDeclaration": childSlot = "declaration"; break;
+    default: return false;
+  }
+  // <lang><zh-CN>doclet 的事件节点 ID 必须与父节点原生 ID 一致，防止后续只把内部事件的 meta.range 改成父范围。</zh-CN><en>The doclet event ID must equal the native parent ID, so a later metadata-only rewrite cannot impersonate the wrapper event.</en></lang>
+  if (!parent || typeof parent.nodeId !== "string" || !parent.nodeId || eventNodeId !== parent.nodeId ||
+    parent[childSlot] !== node || !Array.isArray(parent.range) || parent.range[0] !== start || parent.range[1] !== end) return false;
+  // <lang><zh-CN>内部节点必须严格从声明前缀之后开始，并共享已核原生排除终点；仅包含或仅同终点不足以通过。</zh-CN><en>The inner node must start after the wrapper prefix and share its proven exclusive end; containment or an equal end alone is insufficient.</en></lang>
+  return Number.isSafeInteger(node.range[0]) && Number.isSafeInteger(node.range[1]) && node.range[0] > start && node.range[1] === end;
+}
+
+/**
  * @lang zh-CN 仅从与选中 doclet 绑定的实际 AST 节点取得非空、排除终点的区间。
  * @lang en Takes a nonempty exclusive range only from the actual AST node attached to the selected doclet.
  * @param {object} doclet 最终选中的 doclet。 / Finally selected doclet.
@@ -140,13 +167,14 @@ function positionAt(source, offset) {
  * @returns {object|null} 一基范围或空值。 / One-based range or null.
  */
 function exactAstRange(doclet, source) {
-  // <lang><zh-CN>同时要求 doclet 元数据区间和它实际持有的 AST 节点区间一致，拒绝虚拟声明或猜测区间。</zh-CN><en>Require both doclet metadata and its attached AST node to agree, rejecting virtual declarations and guessed ranges.</en></lang>
+  // <lang><zh-CN>直接节点区间或四种已证原生包装关系才可支撑 doclet 的元数据区间。</zh-CN><en>Only a direct node range or one of four proven native wrapper relationships can support the doclet metadata range.</en></lang>
   const range = doclet?.meta?.range;
   const node = doclet?.meta?.code?.node;
   if (!Array.isArray(range) || range.length !== 2 || !node || typeof node.type !== "string" || !Array.isArray(node.range)) return null;
   const [start, end] = range;
   if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end <= start || end > source.length) return null;
-  if (node.range[0] !== start || node.range[1] !== end || !source.slice(start, end).trim()) return null;
+  if ((node.range[0] !== start || node.range[1] !== end) && !isNativeWrapperRange(node, start, end, doclet.meta.code.id)) return null;
+  if (!source.slice(start, end).trim()) return null;
   return { start: positionAt(source, start), end: positionAt(source, end) };
 }
 

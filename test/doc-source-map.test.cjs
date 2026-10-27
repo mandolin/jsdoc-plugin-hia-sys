@@ -92,6 +92,73 @@ function request(doclets, fixture) {
   };
 }
 
+/**
+ * @lang zh-CN 按 JSDoc 4.0.5 的实际 AST 父子形状构造包装声明反例，保留可验证的对象身份。
+ * @lang en Builds wrapper-declaration cases with JSDoc 4.0.5's observed AST parent-child shape and object identity.
+ * @param {string} file 源文件。 / Source file.
+ * @param {string} name 文档节点名。 / Doclet name.
+ * @param {string} source 完整包装声明。 / Full wrapper declaration.
+ * @param {string} value 内部值源码。 / Inner value source.
+ * @param {string} wrapperType 包装 AST 类型。 / Wrapper AST type.
+ * @param {string} relation 内部节点在包装节点上的属性。 / Child property on the wrapper node.
+ * @returns {object} 带直接 AST 归属关系的 doclet。 / Doclet with direct AST ownership.
+ */
+function wrappedDoclet(file, name, source, value, wrapperType, relation) {
+  // <lang><zh-CN>内部值从已知原文中定位，父节点仅指向同一个内部对象。</zh-CN><en>Locate the inner value in known source and make the parent refer to that exact object.</en></lang>
+  const start = source.indexOf(value);
+  assert.ok(start > 0);
+  const parent = { type: wrapperType, range: [0, source.length], nodeId: "astnode-wrapper" };
+  const node = { type: wrapperType === "ExportDefaultDeclaration" ? "FunctionDeclaration" : "FunctionExpression", range: [start, start + value.length], nodeId: "astnode-inner", parent };
+  parent[relation] = node;
+  const result = doclet(file, name, [0, source.length]);
+  result.meta.code.node = node;
+  result.meta.code.id = parent.nodeId;
+  return result;
+}
+
+test("verified JSDoc wrapper AST owns the full original declaration range", () => {
+  // <lang><zh-CN>四种关系来自已安装 JSDoc 4.0.5 的 visitor/getInfo 实际事件。</zh-CN><en>The four relations come from real visitor/getInfo events in installed JSDoc 4.0.5.</en></lang>
+  const cases = [
+    ["assignment", "module.exports.one = function one() {}", "function one() {}", "AssignmentExpression", "right"],
+    ["variable", "two = function two() {}", "function two() {}", "VariableDeclarator", "init"],
+    ["property", "three: function three() {}", "function three() {}", "Property", "value"],
+    ["export", "export default function four() {}", "function four() {}", "ExportDefaultDeclaration", "declaration"]
+  ];
+  for (const [name, source, value, wrapperType, relation] of cases) {
+    withSource(source, (fixture) => {
+      const selected = wrappedDoclet(fixture.file, name, source, value, wrapperType, relation);
+      const map = buildJsdocDocSourceMap(request([selected], fixture));
+      assert.deepEqual(map.entries[0].sourceRefs[0]?.range, {
+        start: { line: 1, column: 1 },
+        end: { line: 1, column: source.length + 1 }
+      }, name);
+    });
+  }
+});
+
+test("same endpoint or containment without direct JSDoc wrapper ownership remains unverified", () => {
+  const source = "module.exports.one = function one() {}";
+  withSource(source, (fixture) => {
+    const original = wrappedDoclet(fixture.file, "one", source, "function one() {}", "AssignmentExpression", "right");
+    // <lang><zh-CN>相同终点、区间包含、父类型或相同内容都不能替代父子对象身份与原事件范围。</zh-CN><en>Matching end, containment, wrapper type, or text cannot replace direct object identity and original event range.</en></lang>
+    const mutations = [
+      (selected) => { selected.meta.code.node.parent.right = { ...selected.meta.code.node }; },
+      (selected) => { selected.meta.code.node.parent.type = "CallExpression"; },
+      (selected) => { selected.meta.code.node.parent.range = [1, source.length]; },
+      (selected) => { selected.meta.range = [1, source.length]; },
+      (selected) => { selected.meta.code.id = selected.meta.code.node.nodeId; },
+      (selected) => { selected.meta.code.node.parent = null; }
+    ];
+    for (const mutate of mutations) {
+      const selected = wrappedDoclet(fixture.file, "one", source, "function one() {}", "AssignmentExpression", "right");
+      mutate(selected);
+      const map = buildJsdocDocSourceMap(request([selected], fixture));
+      assert.deepEqual(map.entries[0].sourceRefs, []);
+    }
+    assert.ok(original.meta.code.node.parent.right === original.meta.code.node);
+  });
+});
+
 test("actual AST range is one-based UTF-16 with an exclusive end", () => {
   // <lang><zh-CN>非 BMP 注释与 CRLF 检查偏移到行列的单位和端点。</zh-CN><en>A non-BMP comment and CRLF check offset-to-position units and boundaries.</en></lang>
   const source = "/*😀*/ function first(){}\r\nfunction second(){}";
@@ -289,6 +356,18 @@ test("JSDoc CLI writes an opt-in sibling map without changing the default output
     // <lang><zh-CN>真实 hashbang 文件检验 JSDoc 预处理造成的范围降级。</zh-CN><en>A real hashbang file checks conservative range removal after JSDoc pretreatment.</en></lang>
     const scriptFile = path.join(fixture.root, "script.js");
     fs.writeFileSync(scriptFile, "#!/usr/bin/env node\n/** Starts a helper. */\nfunction launch() { return true; }\n", "utf8");
+    // <lang><zh-CN>真实 parser 分别产生四类包装事件；默认导出放在单独模块文件。</zh-CN><en>The real parser produces four wrapper event kinds, with the default export in a separate module file.</en></lang>
+    const wrappedFile = path.join(fixture.root, "wrapped.js");
+    const moduleFile = path.join(fixture.root, "module.mjs");
+    fs.writeFileSync(wrappedFile, [
+      "/** Assignment. */",
+      "module.exports.one = function one() {};",
+      "/** Variable. */",
+      "const two = function two() {};",
+      "/** Holder. */",
+      "const holder = { /** Property. */ three: function three() {} };"
+    ].join("\n"), "utf8");
+    fs.writeFileSync(moduleFile, "/** Default export. */\nexport default function four() {}\n", "utf8");
     /**
      * @lang zh-CN 用真实 JSDoc 解析、微插件顺序和 processingComplete 运行一次轻量工件构建。
      * @lang en Runs a small artifact build through the real JSDoc parser, micro-plugin order, and processingComplete event.
@@ -304,7 +383,7 @@ test("JSDoc CLI writes an opt-in sibling map without changing the default output
       // <lang><zh-CN>配置明确指定解析根与 integration 位置，避免依赖调用者工作目录。</zh-CN><en>The config fixes the parse root and integration path independently of caller cwd.</en></lang>
       const config = {
         plugins: [path.resolve(__dirname, "../src/index.cjs")],
-        source: { include: [fixture.file, scriptFile] },
+        source: { include: [fixture.file, scriptFile, wrappedFile, moduleFile], includePattern: ".+\\.(?:js|mjs)$" },
         opts: {
           destination: outputDir,
           hia: {
@@ -344,6 +423,23 @@ test("JSDoc CLI writes an opt-in sibling map without changing the default output
     const launch = map.entries.find((entry) => entry.symbolId === "jsdoc:function:launch");
     assert.ok(launch);
     assert.deepEqual(launch.sourceRefs, []);
+    // <lang><zh-CN>逐类检查真实 doclet 的完整声明起点，直接函数仍保留原有精度。</zh-CN><en>Check full declaration starts for real wrapper doclets while preserving direct-function precision.</en></lang>
+    const wrapperCases = [
+      ["jsdoc:function:one", "wrapped.js", 2, 1],
+      ["jsdoc:function:two", "wrapped.js", 4, 7],
+      ["jsdoc:constant:holder", "wrapped.js", 6, 7],
+      ["jsdoc:function:holder.three", "wrapped.js", 6, 35],
+      ["jsdoc:function:module.exports", "module.mjs", 2, 1]
+    ];
+    for (const [symbolId, sourcePath, line, column] of wrapperCases) {
+      const entry = map.entries.find((item) => item.symbolId === symbolId);
+      assert.ok(entry, symbolId);
+      assert.equal(entry.sourceRefs.length, 1, symbolId);
+      assert.deepEqual(entry.sourceRefs[0].range.start, { line, column }, symbolId);
+      const mappedSource = map.sources.find((item) => item.id === entry.sourceRefs[0].sourceId);
+      assert.equal(mappedSource.path, sourcePath, symbolId);
+      assert.deepEqual(entry.sourceRefs[0].rangeConvention, { endBoundary: "exclusive", columnUnit: "utf16-code-unit" });
+    }
     assert.equal(map.artifacts[0].path, "hia-integration.json");
     assert.equal(JSON.stringify(map).includes(fixture.root), false);
   });
