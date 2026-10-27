@@ -336,9 +336,11 @@ module.exports = {
       return;
     }
 
+    // <lang><zh-CN>保留事件引用供独立地图在最终写入时检测后续插件对同一解析输入的改写；既有源码字符串仍供旧预览逻辑使用。</zh-CN><en>Retain the event reference so the independent map can detect later plugins rewriting the same parse input; the existing source snapshot still serves legacy previews.</en></lang>
     context.state.sourceFiles.set(event.filename, {
       filePath: event.filename,
-      source: event.source || ""
+      source: event.source || "",
+      sourceEvent: event
     });
 
     scanSourceFragments(event, context);

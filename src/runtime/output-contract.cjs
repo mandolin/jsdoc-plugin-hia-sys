@@ -116,11 +116,20 @@ function hasIntegrationNodeContent(node) {
   return scoreIntegrationNode(node) > 0;
 }
 
+/**
+ * @lang zh-CN 为 integration 按节点 ID 择优保留一份 doclet 与投影节点；同分数保留首次出现者，供独立地图沿用同一身份与顺序。
+ * @lang en Selects one doclet and projected node per integration ID; equal scores keep the first occurrence so an independent map can reuse the same identity and order.
+ * @param {object[]} doclets 最终 JSDoc 文档节点。 / Final JSDoc doclets.
+ * @param {object} state 仅需包含配置的插件状态。 / Plugin state containing configuration.
+ * @returns {Array<{doclet:object,node:object}>} 按首次节点 ID 出现顺序排列的配对。 / Pairs in first-seen node ID order.
+ */
 function buildIntegrationEntries(doclets, state) {
+  // <lang><zh-CN>结果顺序按首次节点 ID 固定，索引负责同身份候选替换。</zh-CN><en>Result order follows the first occurrence of each node ID; indexes support replacement by a stronger candidate.</en></lang>
   const result = [];
   const indexesById = new Map();
 
   for (const doclet of doclets) {
+    // <lang><zh-CN>先用既有投影与内容规则过滤空合成节点，再按内容分数选择。</zh-CN><en>Use existing projection and content rules to filter empty synthetic nodes before scoring candidates.</en></lang>
     const node = toIntegrationNode(doclet, state);
 
     if (!hasIntegrationNodeContent(node)) {
@@ -474,6 +483,12 @@ function buildOutputContract(state, doclets) {
   };
 }
 
+/**
+ * @lang zh-CN 按旧 integration 规则解析输出文件，供同级 sidecar 在写盘前清除残留。
+ * @lang en Resolves the output file under existing integration rules so a sibling sidecar can clear stale output before writing.
+ * @param {object} state 插件状态。 / Plugin state.
+ * @returns {string} 绝对文件路径，或无配置时的空串。 / Absolute file path or empty string when not configured.
+ */
 function resolveIntegrationOutputFile(state) {
   const outputFile = state.config.integration && state.config.integration.outputFile;
 
@@ -514,9 +529,11 @@ module.exports = {
   PRESENTATION_PROFILE_CONTRACT_VERSION,
   STANDALONE_CONTRACT,
   buildIntegrationOutput,
+  buildIntegrationEntries,
   buildOutputContract,
   buildStandaloneOutput,
   buildPresentationHandoff,
   buildThemeContract,
+  resolveIntegrationOutputFile,
   writeIntegrationOutput
 };

@@ -14,6 +14,7 @@ GitHub: <https://github.com/mandolin/jsdoc-plugin-hia-sys>
 - Supports `@lang`, XML-like `<lang>` inline segments and resource-backed multilingual documentation metadata.
 - Provides a small internal micro-plugin pipeline for feature composition.
 - Can write an HIA Integration JSON file for downstream tooling.
+- Can opt in to a separate `doc-source-map@1.1.0` artifact with verified JSDoc AST ranges.
 - Includes diagnostics for missing fragments, missing translations and related metadata issues.
 
 ## Install
@@ -215,6 +216,27 @@ The integration artifact currently contains IR nodes, source fragments, localiza
 
 Current integration output keeps user-facing doclets only, omitting empty JSDoc synthetic nodes created by module/export inference. Source links use `same-tab` or `new-tab`; legacy `currentPage` input is normalized when metadata is produced. Resource records use relative `external-resource` entries, and generated integration JSON does not expose local `filePath` values.
 
+## Independent Documentation Source Map
+
+Set `opts.hia.docSourceMap.enabled` to write `hia-doc-source-map.json` beside the configured integration output:
+
+```json
+{
+  "opts": {
+    "hia": {
+      "source": { "basePath": "." },
+      "integration": {
+        "enabled": true,
+        "outputFile": "docs/api/hia-integration.json"
+      },
+      "docSourceMap": { "enabled": true }
+    }
+  }
+}
+```
+
+The option is off by default and requires an integration output file. The separate map uses the `doc-source-map` contract at version `1.1.0`; enabling it does not change the existing integration JSON. Its entries pair with the doclets selected for that integration output. An exact source range currently requires the verified JSDoc `4.0.5` parser, a selected doclet with a matching native AST range in a `.js`, `.mjs`, `.cjs` or `.jsx` file, final parser input matching the file on disk without JSDoc pretreatment, and a real file under `source.basePath`. Such ranges use one-based lines and columns, UTF-16 code units, and an exclusive end. Other JSDoc versions, virtual or rewritten doclets, hashbang files and otherwise unverifiable inputs retain entries without source ranges. The map contains relative source paths and no source text; inferred `primaryBlock` ranges are not promoted to exact AST ranges.
+
 ## Scripts
 
 ```bash
@@ -225,7 +247,7 @@ npm run release:check
 npm run test:all
 ```
 
-`npm test` runs fixture coverage for the plugin pipeline and metadata output. `npm run test:jsdoc` loads the plugin through real JSDoc. `npm run release:check` validates package metadata and required release files.
+`npm test` runs fixture coverage and the opt-in source-map regression cases, including a small real JSDoc run. `npm run test:jsdoc` loads the plugin through real JSDoc. `npm run release:check` validates package metadata and required release files.
 
 ## Compatibility
 

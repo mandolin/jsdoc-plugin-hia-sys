@@ -61,7 +61,9 @@ const DEFAULT_CONFIG = Object.freeze({
   integration: {
     enabled: true,
     outputFile: ""
-  }
+  },
+  /** @lang zh-CN 独立源码映射默认关闭，须由宿主显式启用。 @lang en Independent source maps are off by default and require explicit host opt-in. */
+  docSourceMap: { enabled: false }
 });
 
 function isPlainObject(value) {
