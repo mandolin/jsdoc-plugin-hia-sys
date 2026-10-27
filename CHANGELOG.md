@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Presentation handoff 1.0.0
+
+- Declare the current neutral presentation identity in the metadata handoff. The descriptor remains distinct from a complete profile or source publication consent; package versions and published archives are unchanged.
+
 ## 0.1.3 - 2026-07-30
 
 ### Added

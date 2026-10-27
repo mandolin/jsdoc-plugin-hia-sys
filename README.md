@@ -241,3 +241,7 @@ Version `0.1.x` is an early public package. The Standalone metadata shape is int
 ## License
 
 MIT
+
+## Presentation identity
+
+The current metadata handoff declares documentation-presentation-profile 1.0.0. Pair it with a theme supporting that exact identity. This handoff is not a full profile validator or source-publication authorization. Package versions and published archives are unchanged by this source update.

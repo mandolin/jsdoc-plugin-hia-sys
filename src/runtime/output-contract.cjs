@@ -20,12 +20,12 @@ const PRESENTATION_PROFILE_CONTRACT = "documentation-presentation-profile";
 
 /**
  * @lang zh-CN
- * 固定 draft exact-match 版本；未知版本必须由 renderer fail closed。
+ * 固定当前写者1.0.0身份；renderer须核对版本配对，该handoff不是完整profile或公开授权。
  *
  * @lang en
- * Pins the exact-match draft version; a renderer must fail closed on an unknown version.
+ * Pins current writer identity 1.0.0; renderers check version pairing, and this handoff is neither a complete profile nor publication consent.
  */
-const PRESENTATION_PROFILE_CONTRACT_VERSION = "0.1.0-draft";
+const PRESENTATION_PROFILE_CONTRACT_VERSION = "1.0.0";
 
 /** @lang zh-CN 允许传递的页面模式闭集。 @lang en Closed page-mode set accepted for handoff. */
 const PRESENTATION_PAGE_MODES = new Set(["multi-page", "single-page"]);

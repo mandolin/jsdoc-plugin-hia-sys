@@ -241,7 +241,7 @@ function runBasicFixture() {
   assert.equal(state.output.standalone.theme.consumes.presentation, "doclet.hia.presentation");
   assert.deepEqual(state.output.standalone.theme.presentationProfile, {
     contract: "documentation-presentation-profile",
-    contractVersion: "0.1.0-draft",
+    contractVersion: "1.0.0",
     role: "producer-metadata-handoff",
     defaults: {
       pageMode: "multi-page",
