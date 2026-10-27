@@ -359,6 +359,8 @@ test("JSDoc CLI writes an opt-in sibling map without changing the default output
     // <lang><zh-CN>真实 parser 分别产生四类包装事件；默认导出放在单独模块文件。</zh-CN><en>The real parser produces four wrapper event kinds, with the default export in a separate module file.</en></lang>
     const wrappedFile = path.join(fixture.root, "wrapped.js");
     const moduleFile = path.join(fixture.root, "module.mjs");
+    // <lang><zh-CN>同名虚拟注释与真实声明共存，用于证明写入器不会按名称借用 AST 范围。</zh-CN><en>A named virtual comment and real declaration coexist to prove the writer never borrows an AST range by name.</en></lang>
+    const namedTagFile = path.join(fixture.root, "named-tag.js");
     fs.writeFileSync(wrappedFile, [
       "/** Assignment. */",
       "module.exports.one = function one() {};",
@@ -368,6 +370,7 @@ test("JSDoc CLI writes an opt-in sibling map without changing the default output
       "const holder = { /** Property. */ three: function three() {} };"
     ].join("\n"), "utf8");
     fs.writeFileSync(moduleFile, "/** Default export. */\nexport default function four() {}\n", "utf8");
+    fs.writeFileSync(namedTagFile, "/** Explicit named virtual API.\n * @lang zh-CN 显式命名的虚拟 API。\n * @lang en Explicit named virtual API.\n * @function tagged\n */\nfunction tagged() { return true; }\n", "utf8");
     /**
      * @lang zh-CN 用真实 JSDoc 解析、微插件顺序和 processingComplete 运行一次轻量工件构建。
      * @lang en Runs a small artifact build through the real JSDoc parser, micro-plugin order, and processingComplete event.
@@ -383,7 +386,7 @@ test("JSDoc CLI writes an opt-in sibling map without changing the default output
       // <lang><zh-CN>配置明确指定解析根与 integration 位置，避免依赖调用者工作目录。</zh-CN><en>The config fixes the parse root and integration path independently of caller cwd.</en></lang>
       const config = {
         plugins: [path.resolve(__dirname, "../src/index.cjs")],
-        source: { include: [fixture.file, scriptFile, wrappedFile, moduleFile], includePattern: ".+\\.(?:js|mjs)$" },
+        source: { include: [fixture.file, scriptFile, wrappedFile, moduleFile, namedTagFile], includePattern: ".+\\.(?:js|mjs)$" },
         opts: {
           destination: outputDir,
           hia: {
@@ -420,6 +423,14 @@ test("JSDoc CLI writes an opt-in sibling map without changing the default output
     });
     assert.equal(greet.sourceRefs[0].rangeConvention.endBoundary, "exclusive");
     assert.equal(greet.sourceRefs[0].rangeConvention.columnUnit, "utf16-code-unit");
+    // <lang><zh-CN>有名称的 JSDoc 注释仍进入 integration，但没有原生 AST 所属关系时保持来源未知。</zh-CN><en>The named JSDoc comment remains in integration but has unknown source provenance without native AST ownership.</en></lang>
+    const integration = JSON.parse(fs.readFileSync(enabled.integrationFile, "utf8"));
+    // <lang><zh-CN>地图条目须对应被选中的虚拟 doclet，而非同名代码声明。</zh-CN><en>The map entry must follow the selected virtual doclet rather than the same-named code declaration.</en></lang>
+    const tagged = map.entries.find((entry) => entry.symbolId === "jsdoc:function:tagged");
+    assert.equal(integration.ir.nodes.find((node) => node.id === "jsdoc:function:tagged")?.summary, "Explicit named virtual API.");
+    assert.ok(tagged);
+    assert.deepEqual(tagged.sourceRefs, []);
+    assert.equal(map.sources.some((source) => source.path === "named-tag.js"), false);
     const launch = map.entries.find((entry) => entry.symbolId === "jsdoc:function:launch");
     assert.ok(launch);
     assert.deepEqual(launch.sourceRefs, []);
