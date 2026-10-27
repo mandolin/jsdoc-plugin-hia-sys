@@ -351,6 +351,80 @@ test("failed integration write does not leave a stale opt-in map", () => {
   });
 });
 
+/**
+ * @lang zh-CN 经真实 JSDoc 解析及最终输出事件核空文件、空白与虚拟注释，不把不存在的语法节点标为精确来源。
+ * @lang en Checks empty, whitespace-only, and virtual-comment files through the real parser and final output events without inventing precise syntax-node provenance.
+ */
+test("JSDoc CLI keeps empty and virtual-only sources free of invented exact ranges", () => {
+  // <lang><zh-CN>前三个输入没有可定位的真实声明；最后一个真实函数是同链正对照。</zh-CN><en>The first three inputs have no locatable declaration; the real function is a positive control for the same pipeline.</en></lang>
+  const cases = [
+    { name: "empty", source: "", symbolId: null },
+    { name: "whitespace", source: " \r\n\t\r\n", symbolId: null },
+    { name: "virtual", source: "/** Virtual API.\n * @function virtualOnly\n */\n", symbolId: "jsdoc:function:virtualOnly" },
+    { name: "real", source: "/** Real API. */\nfunction actual() { return true; }\n", symbolId: "jsdoc:function:actual" }
+  ];
+  for (const item of cases) {
+    withSource(item.source, (fixture) => {
+      // <lang><zh-CN>每个 parser 进程使用独立输出，防止前一输入留下的地图混入空文件结果。</zh-CN><en>Each parser process has separate output so a previous map cannot contaminate an empty-file result.</en></lang>
+      const outputDir = path.join(fixture.root, "output");
+      // <lang><zh-CN>integration 与文档地图必须由同一 processingComplete 写出。</zh-CN><en>The integration and documentation map must be written by the same processingComplete event.</en></lang>
+      const integrationFile = path.join(outputDir, "hia-integration.json");
+      // <lang><zh-CN>固定配置路径只位于本测试临时目录。</zh-CN><en>The fixed config path stays inside this test's temporary directory.</en></lang>
+      const configFile = path.join(fixture.root, "jsdoc.json");
+      fs.writeFileSync(configFile, JSON.stringify({
+        plugins: [path.resolve(__dirname, "../src/index.cjs")],
+        source: { include: [fixture.file], includePattern: ".+\\.js$" },
+        opts: {
+          destination: outputDir,
+          hia: {
+            source: { basePath: fixture.root },
+            i18n: { enabled: false },
+            integration: { enabled: true, outputFile: integrationFile },
+            docSourceMap: { enabled: true }
+          }
+        }
+      }), "utf8");
+      // <lang><zh-CN>-X 使用实际 parser 和插件事件而不渲染页面；子进程继承当前测试的 Node.js 运行时。</zh-CN><en>-X uses the actual parser and plugin events without page rendering; the child inherits this test's Node.js runtime.</en></lang>
+      const result = spawnSync(process.execPath, [path.resolve(__dirname, "../node_modules/jsdoc/jsdoc.js"), "-c", configFile, "-X"], {
+        cwd: fixture.root,
+        encoding: "utf8",
+        maxBuffer: 1024 * 1024
+      });
+      assert.equal(result.status, 0, `${item.name}: ${result.stderr}`);
+      // <lang><zh-CN>读取实际写出件，不以预构造 doclet 或直接调用纯写入器替代真实空输入。</zh-CN><en>Read actual emitted artifacts rather than replacing real empty input with synthetic doclets or a direct writer call.</en></lang>
+      const integration = JSON.parse(fs.readFileSync(integrationFile, "utf8"));
+      // <lang><zh-CN>地图的来源数量和引用必须与本输入真实声明一致。</zh-CN><en>The map's sources and references must match actual declarations in this input.</en></lang>
+      const map = JSON.parse(fs.readFileSync(path.join(outputDir, DOC_SOURCE_MAP_FILE), "utf8"));
+      assert.equal(map.contractVersion, "1.1.0");
+      assert.deepEqual(map.entries.map((entry) => entry.symbolId), integration.ir.nodes.map((node) => node.id));
+      if (item.symbolId === null) {
+        assert.deepEqual(integration.ir.nodes, []);
+        assert.deepEqual(map.entries, []);
+        assert.deepEqual(map.sources, []);
+      } else {
+        assert.equal(map.entries.length, 1);
+        assert.equal(map.entries[0].symbolId, item.symbolId);
+        if (item.name === "virtual") {
+          assert.deepEqual(map.entries[0].sourceRefs, []);
+          assert.deepEqual(map.sources, []);
+        } else {
+          assert.equal(map.sources.length, 1);
+          assert.equal(map.sources[0].path, "sample.js");
+          assert.equal(map.entries[0].sourceRefs.length, 1);
+          assert.deepEqual(map.entries[0].sourceRefs[0].range, {
+            start: { line: 2, column: 1 },
+            end: { line: 2, column: "function actual() { return true; }".length + 1 }
+          });
+          assert.deepEqual(map.entries[0].sourceRefs[0].rangeConvention, {
+            endBoundary: "exclusive", columnUnit: "utf16-code-unit"
+          });
+        }
+      }
+      assert.equal(JSON.stringify(map).includes(fixture.root), false);
+    });
+  }
+});
+
 test("JSDoc CLI writes an opt-in sibling map without changing the default output", () => {
   withSource("/** Greets a visitor. */\nfunction greet(name) { return name; }\n", (fixture) => {
     // <lang><zh-CN>真实 hashbang 文件检验 JSDoc 预处理造成的范围降级。</zh-CN><en>A real hashbang file checks conservative range removal after JSDoc pretreatment.</en></lang>

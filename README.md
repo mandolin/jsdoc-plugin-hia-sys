@@ -237,6 +237,8 @@ Set `opts.hia.docSourceMap.enabled` to write `hia-doc-source-map.json` beside th
 
 The option is off by default and requires an integration output file. The separate map uses the `doc-source-map` contract at version `1.1.0`; enabling it does not change the existing integration JSON. Its entries pair with the doclets selected for that integration output. An exact source range currently requires the verified JSDoc `4.0.5` parser, a selected doclet with a directly matching native AST range or a proven native `AssignmentExpression`, `Property`, `VariableDeclarator`, or `ExportDefaultDeclaration` parent-child relationship and matching original event node ID in a `.js`, `.mjs`, `.cjs` or `.jsx` file, final parser input matching the file on disk without JSDoc pretreatment, and a real file under `source.basePath`. The proven wrapper uses the full original declaration range, including the assignment target, property key, variable name, or export prefix. Such ranges use one-based lines and columns, UTF-16 code units, and an exclusive end. Other JSDoc versions, virtual or rewritten doclets, hashbang files and otherwise unverifiable inputs retain entries without source ranges. The map contains relative source paths and no source text; inferred `primaryBlock` ranges are not promoted to exact AST ranges.
 
+With this option enabled, an empty or whitespace-only input produces an empty map. A comment-only virtual API keeps its documentation entry without source references; it does not acquire a range from the comment's location.
+
 ## Scripts
 
 ```bash
