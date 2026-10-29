@@ -1,5 +1,8 @@
 # Changelog
 
+- 中文：补充标准回调与_hia嵌套兼容面API参考和触及双语注释；hook错误摘要不携带原异常内容，非Error抛值也安全记录，显式本地throwOnError仍原样重抛。
+- English: Document standard callbacks and the nested _hia compatibility API with bilingual comments; hook summaries omit thrown contents and handle non-Error throws, while explicit local throwOnError preserves the original value.
+
 ## Unreleased — Supported runtime baseline
 
 - 源清单、锁与本地/CI运行基线对齐Node.js 22.23.4和24.22.1，两平台门禁及拒绝漂移检查同步；旧已发布工件不改写，本次不发布npm。

@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, "..");
 const requiredFiles = [
   "package.json",
   "README.md",
+  "API.md",
   "CHANGELOG.md",
   "LICENSE",
   "RELEASE_CHECKLIST.md",
@@ -70,6 +71,7 @@ function run() {
   assert.ok(pkg.scripts["check:syntax"]);
   assert.ok(pkg.scripts["release:check"]);
   assert.ok(pkg.files.includes("CHANGELOG.md"));
+  assert.ok(pkg.files.includes("API.md"));
   assert.ok(pkg.files.includes("RELEASE_CHECKLIST.md"));
   assert.ok(pkg.files.includes("THIRD_PARTY_NOTICES.md"));
 

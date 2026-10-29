@@ -278,3 +278,9 @@ MIT
 ## Presentation identity
 
 The current metadata handoff declares documentation-presentation-profile 1.0.0. Pair it with a theme supporting that exact identity. This handoff is not a full profile validator or source-publication authorization. Package versions and published archives are unchanged by this source update.
+
+## JavaScript API reference
+
+See the shipped [API reference](API.md) for every root/nested export, callback signature, defaults, Errors, Side effects and generated-artifact compatibility.
+
+中文：包内API参考覆盖实际根/嵌套公开面、默认值、错误、副作用及生成链责任，不将未发布源码当npm发行。
