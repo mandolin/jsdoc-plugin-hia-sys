@@ -144,7 +144,7 @@ function runBasicFixture() {
   });
 
   assert.ok(doclet.hia);
-  assert.equal(doclet.hia.version, "0.1.3");
+  assert.equal(doclet.hia.version, "1.0.0");
   assert.equal(doclet.hia.mode, "standalone");
   assert.equal(doclet.hia.doclet.name, "greet");
   assert.deepEqual(doclet.hia.presentation, {

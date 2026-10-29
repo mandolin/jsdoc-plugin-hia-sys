@@ -64,7 +64,7 @@ function filterEnabledMicroPlugins(microPlugins, config) {
  * @lang en Creates an independent trusted micro-plugin system; merges defaults, JSDoc environment and explicit overrides in order, executing setup immediately.
  * @param {object} [options] 微插件列表和configOverrides。 / Micro-plugin list and configOverrides.
  * @returns {object} defineTags/handle/getState/getMicroPlugins接口；state为本系统可变引用。 / defineTags/handle/getState/getMicroPlugins surface; state is this system's mutable reference.
- * @throws {Error} setup原错误或throwOnError开启时的hook原错误，不自动脱敏本地重抛。 / Original setup errors or hook errors when throwOnError is enabled; local rethrows are not automatically redacted.
+ * @throws {*} setup原抛值或throwOnError开启时的hook原抛值，不自动脱敏本地重抛。 / Original thrown setup/hook values when throwOnError applies; local rethrows are not automatically redacted.
  */
 function createPluginSystem(options) {
   // <lang><zh-CN>配置/状态/上下文仅归本系统；getState不是公开安全快照。</zh-CN><en>Configuration/state/context belong to this system; getState is not a public-safe snapshot.</en></lang>
@@ -89,7 +89,7 @@ function createPluginSystem(options) {
    * @param {string} hookName 本地hook名称。 / Local hook name.
    * @param {object} event 可变JSDoc事件。 / Mutable JSDoc event.
    * @returns {void} 不返回hook结果。 / Hook return values are ignored.
-   * @throws {Error} 显式throwOnError时原样重抛。 / Rethrows the original value when throwOnError is explicit.
+   * @throws {*} 显式throwOnError时原样重抛，值不一定是Error。 / Rethrows the original value when throwOnError is explicit; it need not be an Error.
    */
   function runHook(hookName, event) {
     for (const plugin of microPlugins) {

@@ -4,7 +4,7 @@
 
 Package: `@mandolin/jsdoc-plugin-hia-sys`
 
-Version: `0.1.2`
+Version: `1.0.0` (source candidate)
 
 ## Required Checks
 
@@ -44,3 +44,9 @@ Version: `0.1.2`
 - API stability is not final.
 - The HIA Integration IR is a draft contract, not final core schema.
 - This package supports JSDoc 4.x in the current cycle.
+
+## Candidate publication boundary
+
+Run the complete gate and original-tarball consumer checks for the exact commit. Source candidate qualification does not execute npm publication or change dist-tags. Confirm provenance, registry availability and target adoption separately. See [MIGRATION.md](MIGRATION.md).
+
+中文：源码候选与实际发行分开；不得因版本改号跳过分发/兼容/隐私或目标采用门禁。

@@ -284,3 +284,9 @@ The current metadata handoff declares documentation-presentation-profile 1.0.0. 
 See the shipped [API reference](API.md) for every root/nested export, callback signature, defaults, Errors, Side effects and generated-artifact compatibility.
 
 中文：包内API参考覆盖实际根/嵌套公开面、默认值、错误、副作用及生成链责任，不将未发布源码当npm发行。
+
+## 1.0.0 source candidate
+
+The current source is a public-package 1.0.0 candidate; registry publication is separate. See the shipped [migration guide](MIGRATION.md) for runtime/package versus wire identities and diagnostic changes.
+
+中文：当前源码候选1.0.0，未由此宣称npm发布；旧工件不改号。

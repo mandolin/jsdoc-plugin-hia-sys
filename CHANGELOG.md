@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0 source candidate
+
+- 中文：包/运行身份协调1.0.0；既有wire版本保持，新增实际分发迁移说明与候选检查，npm发布另验。
+- English: Coordinate package/runtime identity at 1.0.0 while preserving existing wire versions; ship migration guidance and candidate checks, with npm publication verified separately.
+
 - 中文：补充标准回调与_hia嵌套兼容面API参考和触及双语注释；hook错误摘要不携带原异常内容，非Error抛值也安全记录，显式本地throwOnError仍原样重抛。
 - English: Document standard callbacks and the nested _hia compatibility API with bilingual comments; hook summaries omit thrown contents and handle non-Error throws, while explicit local throwOnError preserves the original value.
 
