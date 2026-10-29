@@ -1,0 +1,4 @@
+# 中文：采用已验证的默认运行版本；CI另验Node22。
+# English: Select the tested default runtime; CI also verifies Node22.
+[tools]
+node = "24.22.1"

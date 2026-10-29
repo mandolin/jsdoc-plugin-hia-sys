@@ -18,7 +18,7 @@ Version: `0.1.2`
 - [ ] `npm run test:all`
 - [ ] `npm run release:gate`
 - [ ] `npm pack --dry-run --json`
-- [ ] GitHub Actions CI has passed on Node.js 18.x and 20.x for the release commit.
+- [ ] GitHub Actions CI has passed on Node.js 22.23.4 and 24.22.1, on Windows and Ubuntu, for the exact release commit.
 
 ## Manual Review
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Supported runtime baseline
+
+- 源清单、锁与本地/CI运行基线对齐Node.js 22.23.4和24.22.1，两平台门禁及拒绝漂移检查同步；旧已发布工件不改写，本次不发布npm。
+- Align current source, locks and local/CI runtime floors on Node.js 22/24, with Windows/Ubuntu checks and drift rejection. Existing published archives remain separate; no npm release is announced.
+
+
 ## Unreleased — Presentation handoff 1.0.0
 
 - Declare the current neutral presentation identity in the metadata handoff. The descriptor remains distinct from a complete profile or source publication consent; package versions and published archives are unchanged.

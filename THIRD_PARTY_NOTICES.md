@@ -12,7 +12,7 @@ This package has no bundled runtime dependency besides Node.js built-ins.
 
 ## Development Dependencies
 
-- `jsdoc` `^4.0.5` (`Apache-2.0`)
+- `jsdoc` `4.0.5` (`Apache-2.0`)
 
 ## License Audit
 

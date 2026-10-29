@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, "..");
 const allowedLicenses = new Set(["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC"]);
 const forbiddenLicenseFragments = ["GPL", "AGPL", "LGPL", "SSPL", "BUSL", "BSL"];
 
+/** @lang zh-CN 锁定实际验证的JSDoc开发版本；公开peer范围另行治理。 @lang en Pins the actually tested development JSDoc version; public peer ranges remain separate. */
 const auditRecords = [
   {
     name: "jsdoc",
@@ -19,7 +20,7 @@ const auditRecords = [
   {
     name: "jsdoc",
     dependencyType: "devDependencies",
-    versionRange: "^4.0.5",
+    versionRange: "4.0.5",
     license: "Apache-2.0",
     purpose: "Development and fixture execution for real JSDoc smoke tests."
   }

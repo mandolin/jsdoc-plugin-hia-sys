@@ -1,5 +1,14 @@
 # @mandolin/jsdoc-plugin-hia-sys
 
+## Supported runtime
+
+Current source supports Node.js `^22.23.4 || ^24.22.1`. Release checks use
+Node.js 22.23.4 and 24.22.1 on Windows and Ubuntu; actual package qualification
+and npm availability remain separate. The repository default is Node.js 24.22.1.
+
+中文：当前源码运行范围为上述两条已确认版本线，CI/安装验收与实际npm发布分别核对。
+
+
 HIA metadata plugin for JSDoc.
 
 `@mandolin/jsdoc-plugin-hia-sys` extends JSDoc with structured metadata for source references, source previews, multilingual documentation and optional HIA integration output. It can be used as a standalone JSDoc plugin in ordinary JavaScript projects, or as a JSDoc adapter in a larger HIA documentation pipeline.
@@ -253,7 +262,7 @@ npm run test:all
 
 ## Compatibility
 
-- Node.js 18 or newer.
+- Node.js `^22.23.4 || ^24.22.1` for the current source candidate; previously published archives retain their own metadata.
 - JSDoc 4.x.
 - CommonJS runtime.
 - `doclet.hia.presentation` is an additive `hia-jsdoc-presentation@0.1.0` companion profile; it is not a language-neutral HIA core contract.
