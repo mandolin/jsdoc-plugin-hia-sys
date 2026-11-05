@@ -384,4 +384,5 @@ function clearJsdocDocSourceMap(integrationOutputFile) {
   if (fs.existsSync(outputFile)) fs.unlinkSync(outputFile);
 }
 
-module.exports = { DOC_SOURCE_MAP_FILE, buildJsdocDocSourceMap, clearJsdocDocSourceMap, writeJsdocDocSourceMap };
+// <lang><zh-CN>源码证明供内部签名投影复用；不通过根公开API新增接口或放宽地图精度。</zh-CN><en>Source-proof helpers are reused internally by signature projection without adding root public APIs or relaxing map precision.</en></lang>
+module.exports = { DOC_SOURCE_MAP_FILE, buildJsdocDocSourceMap, clearJsdocDocSourceMap, writeJsdocDocSourceMap, resolveVerifiedSource, exactAstRange, getInstalledJsdocVersion };

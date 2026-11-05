@@ -2,6 +2,9 @@
 
 ## 1.0.0 source candidate
 
+- 中文：在现有源码预览授权与原生AST/同轮源码证明下，新增可选可调用签名，保留实际参数片段及已声明返回类型；旧无证据节点、wire身份和地图精度不变。
+- English: Add optional callable signatures under existing source-preview permission and native AST/source proof, preserving actual parameter fragments and declared return types without changing unproven nodes, wire identities or map precision.
+
 - 中文：包/运行身份协调1.0.0；既有wire版本保持，新增实际分发迁移说明与候选检查，npm发布另验。
 - English: Coordinate package/runtime identity at 1.0.0 while preserving existing wire versions; ship migration guidance and candidate checks, with npm publication verified separately.
 

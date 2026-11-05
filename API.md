@@ -2,6 +2,15 @@
 
 中文摘要：公开面包括标准JSDoc回调和已导出的_hia嵌套面；下划线不是省略资格审阅的理由。回调操作同一进程的可变状态；原状态/配置可能含私有源码，只能由受信本地代码使用，不能直接作为公开工件。
 
+## Callable signatures
+
+中文：新构建可在原生AST与同轮源码证明、已有源码预览授权下附带可选signature；旧字段/身份保持，返回类型不推断，默认表达式仍须可公开。
+
+New integration 0.1.0 nodes may carry optional `signature` text when native JSDoc 4.0.5 AST ranges, captured input and on-disk source agree. Existing `source.preview.enabled` must be exactly `true` and `source.mode` must be `all`. For example, `async run(value = 2, {x}, ...rest) → object` uses actual parameter fragments and an explicitly documented `@returns {object}`; parameter types remain in `jsdoc.params`. Async return types are not inferred or wrapped in `Promise` automatically.
+
+Signatures are display text, not a grammar or executable source. Default expressions can contain nested functions and source literals, so producers retain the same public-safe responsibility as for existing source previews. Disabled previews, parser pretreatment, changed inputs, virtual functions or unverified AST wrappers omit the field. Old artifacts without it remain valid; consumers must not invent empty parameter lists from missing tags. The existing map precision rules and root public API exports are unchanged.
+
+
 ## Root exports
 
 | Export | Signature and responsibility |

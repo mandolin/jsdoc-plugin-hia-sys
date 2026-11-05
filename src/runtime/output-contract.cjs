@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { normalizeOpenMode } = require("./source.cjs");
 const { VERSION } = require("../version.cjs");
+const { buildCallableSignature } = require("./callable-signature.cjs");
 
 const CONTRACT_VERSION = "0.1.0";
 const STANDALONE_CONTRACT = "jsdoc-plugin-hia-sys/standalone";
@@ -127,10 +128,12 @@ function buildIntegrationEntries(doclets, state) {
   // <lang><zh-CN>结果顺序按首次节点 ID 固定，索引负责同身份候选替换。</zh-CN><en>Result order follows the first occurrence of each node ID; indexes support replacement by a stronger candidate.</en></lang>
   const result = [];
   const indexesById = new Map();
+  // <lang><zh-CN>每次投影独立核验源码，避免跨构建缓存掩盖后续插件或磁盘变更。</zh-CN><en>Verify source afresh for each projection so a cross-build cache cannot conceal plugin or disk changes.</en></lang>
+  const verifiedSources = new Map();
 
   for (const doclet of doclets) {
     // <lang><zh-CN>先用既有投影与内容规则过滤空合成节点，再按内容分数选择。</zh-CN><en>Use existing projection and content rules to filter empty synthetic nodes before scoring candidates.</en></lang>
-    const node = toIntegrationNode(doclet, state);
+    const node = toIntegrationNode(doclet, state, verifiedSources);
 
     if (!hasIntegrationNodeContent(node)) {
       continue;
@@ -279,8 +282,9 @@ function summarizeDoclet(doclet, state) {
  * @param {object} doclet JSDoc 文档节点 / JSDoc documentation node.
  * @param {object} state 插件状态 / Plugin state.
  * @returns {object} sanitized integration node / 已清洗的 integration node.
+ * @param {Map} verifiedSources 单次投影源码证明缓存，不跨构建复用。 / Source-proof cache for this projection only, never across builds.
  */
-function toIntegrationNode(doclet, state) {
+function toIntegrationNode(doclet, state, verifiedSources) {
   const metadata = getMetadata(doclet, state);
 
   const node = {
@@ -318,6 +322,9 @@ function toIntegrationNode(doclet, state) {
     diagnostics: normalizeDiagnostics(metadata.diagnostics, `ir.nodes.${getNodeId(doclet)}.diagnostics`)
   };
 
+  // <lang><zh-CN>只增加有实际源码证明的可选核心签名；旧节点无证据时保持原结构与0.1.0身份。</zh-CN><en>Add the optional core signature only with actual source proof; nodes without evidence retain their old shape and 0.1.0 identity.</en></lang>
+  const signature = buildCallableSignature(doclet, state, verifiedSources);
+  if (signature) node.signature = signature;
   return sanitizeIntegrationValue(node);
 }
 
