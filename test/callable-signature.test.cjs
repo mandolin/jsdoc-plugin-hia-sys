@@ -24,7 +24,7 @@ function parse(source,sourceOptions={},rewrite=false) {
     fs.writeFileSync(file,source);
     const plugins=[path.resolve(__dirname,"../src/index.cjs")];
     if(rewrite) {const rewriter=path.join(root,"rewrite.cjs");fs.writeFileSync(rewriter,"exports.handlers={beforeParse(e){e.source+='\\n';}};");plugins.push(rewriter);}
-    fs.writeFileSync(config,JSON.stringify({plugins,source:{include:[file],includePattern:".+\\.mjs$"},opts:{hia:{mode:"hiaIntegration",source:{basePath:root,preview:{enabled:true},...sourceOptions},integration:{enabled:true,outputFile:output}}}}));
+    fs.writeFileSync(config,JSON.stringify({plugins,source:{include:[file],includePattern:".+\\.mjs$"},opts:{hia:{mode:"hiaIntegration",source:{basePath:root,preview:{enabled:true},...sourceOptions},i18n:{enabled:true,defaultLocale:"en",fallbackLocale:"en",locales:["en","zh-CN"]},integration:{enabled:true,outputFile:output}}}}));
     const result=spawnSync(process.execPath,[require.resolve("jsdoc/jsdoc.js"),"-c",config,"-X"],{cwd:root,encoding:"utf8",shell:false,maxBuffer:4*1024*1024});
     assert.equal(result.status,0,result.stderr);
     return JSON.parse(fs.readFileSync(output)).ir.nodes;
@@ -59,4 +59,27 @@ test("virtual documented functions have no fabricated source signature",()=>{
 });
 test("later source rewrites cannot reuse a prior source snapshot",()=>{
   assert.equal(parse('/** altered */\nexport function altered(value) {}',{},true).find(node=>node.name==="altered").signature,undefined);
+});
+
+test("nested object methods retain defaults and async generator parameters",()=>{
+  const nodes=parse('/** Public callbacks. */\nexport const hooks = {\n/** Runs a hook.\n * @returns {object} result\n */\nasync *run(value = 1, ...rest) { throw new Error("BODY_MUST_NOT_APPEAR"); }\n};');
+  assert.equal(nodes.find(node=>node.name==="run").signature,"async *run(value = 1, ...rest) → object");
+});
+test("nested object arrow properties retain actual parameter shapes",()=>{
+  const nodes=parse('/** Public callbacks. */\nexport const hooks = {\n/** Reads a value. */\nread: ({value}, fallback = 3) => value ?? fallback\n};');
+  assert.equal(nodes.find(node=>node.name==="read").signature,"read({value}, fallback = 3)");
+});
+test("nested methods still obey source preview authorization",()=>{
+  const nodes=parse('/** Public callbacks. */\nexport const hooks = {\n/** Runs a hook. */\nrun(secret = "SOURCE_DEFAULT") {}\n};',{preview:{enabled:false}});
+  assert.equal(nodes.find(node=>node.name==="run").signature,undefined);
+});
+
+test("nested member bilingual fields remain distinct from the parent description",()=>{
+  const nodes=parse('/**\n * @lang zh-CN 父对象。\n * @lang en Parent object.\n */\nexport const hooks = {\n/**\n * @lang zh-CN 读取值。\n * @lang en Reads a value.\n * @param {string} value <lang><zh-CN>输入。</zh-CN><en>Input.</en></lang>\n * @returns {string} <lang><zh-CN>结果。</zh-CN><en>Result.</en></lang>\n */\nread(value) {return value;}\n};');
+  const member=nodes.find(node=>node.name==="read");
+  assert.equal(member.i18n.fields.description.localizedText.en,"Reads a value.");
+  assert.equal(member.i18n.fields.description.localizedText["zh-CN"],"读取值。");
+  assert.equal(member.jsdoc.params[0].name,"value");
+  assert.equal(member.jsdoc.returns[0].type.names[0],"string");
+  assert.notEqual(member.i18n.fields.description.localizedText.en,nodes.find(node=>node.name==="hooks").i18n.fields.description.localizedText.en);
 });

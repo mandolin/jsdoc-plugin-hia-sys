@@ -2,6 +2,9 @@
 
 ## 1.0.0 source candidate
 
+- 中文：补齐嵌套输出构造器的逐方法原生注释，并以真实JSDoc覆盖对象方法、箭头属性及预览禁用签名反例；运行行为、签名算法和wire不变。
+- English: Document nested output builders individually and exercise object methods, arrow properties and disabled-preview signatures through real JSDoc, without changing runtime behavior, the signature algorithm or wire identities.
+
 - 中文：在现有源码预览授权与原生AST/同轮源码证明下，新增可选可调用签名，保留实际参数片段及已声明返回类型；旧无证据节点、wire身份和地图精度不变。
 - English: Add optional callable signatures under existing source-preview permission and native AST/source proof, preserving actual parameter fragments and declared return types without changing unproven nodes, wire identities or map precision.
 

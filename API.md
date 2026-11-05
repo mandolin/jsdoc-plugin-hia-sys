@@ -29,6 +29,14 @@ isolation does not establish a complete document or source-range proof.
 
 ## Nested compatibility surface
 
+Object methods and arrow-valued properties use the same verified native AST
+signature path as top-level functions. A parent object's description does not
+replace a method's own documentation. Exported output builders carry individual
+native JSDoc comments for their arguments, results and I/O responsibilities;
+their existing function behavior and wire identities remain unchanged.
+
+中文：嵌套方法复用相同源码证明与签名逻辑，外层摘要不能代替方法注释；输出构造器逐项说明输入、返回和I/O责任，不改变既有行为或工件身份。
+
 | Property | Input/result and ownership |
 | --- | --- |
 | `_hia.createPluginSystem` | `(options?) → system`; options contains microPlugins and configOverrides. Defaults, JSDoc environment and explicit overrides are merged in that order. Configured names filter supplied plugin objects, sorted by order (existing fallback 100); enabled setup(context) runs immediately. |

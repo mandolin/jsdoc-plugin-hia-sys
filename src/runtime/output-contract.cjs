@@ -422,6 +422,13 @@ function buildThemeContract(state, doclets) {
   };
 }
 
+/**
+ * @lang zh-CN 构造独立主题消费数据，不写盘；原始片段与状态需由调用方按公开边界处理。
+ * @lang en Builds standalone-theme consumption data without writing; callers must handle raw fragments and state under publication boundaries.
+ * @param {object} state 当前受信插件状态。 / Current trusted plugin state.
+ * @param {object[]} doclets 本轮原生节点。 / Native doclets from this run.
+ * @returns {object} 旧standalone契约投影，非脱敏后的任意状态快照。 / Existing standalone projection, not an arbitrary sanitized state snapshot.
+ */
 function buildStandaloneOutput(state, doclets) {
   return {
     contract: STANDALONE_CONTRACT,
@@ -441,6 +448,13 @@ function buildStandaloneOutput(state, doclets) {
   };
 }
 
+/**
+ * @lang zh-CN 按既有内容过滤和同身份择优构造Integration并清理结构；不写盘或更改契约版本。
+ * @lang en Builds structurally sanitized Integration using existing content filtering and same-identity selection, without writing or changing its contract version.
+ * @param {object} state 当前插件配置、源码证明和诊断。 / Current configuration, source proof and diagnostics.
+ * @param {object[]} doclets 本轮原生节点，空合成节点仍按旧规则过滤。 / Native doclets; empty synthetic nodes retain existing filtering.
+ * @returns {object} Integration0.1.0及已有字段/来源投影。 / Integration0.1.0 with existing field/source projections.
+ */
 function buildIntegrationOutput(state, doclets) {
   const integrationEntries = buildIntegrationEntries(doclets, state);
   const nodes = integrationEntries.map((entry) => entry.node);
@@ -479,6 +493,13 @@ function buildIntegrationOutput(state, doclets) {
   });
 }
 
+/**
+ * @lang zh-CN 组合独立主题与Integration投影；非数组节点输入按空数组，不执行文件写入。
+ * @lang en Combines standalone and Integration projections, treating non-array doclets as empty and performing no file writes.
+ * @param {object} state 当前受信插件状态。 / Current trusted plugin state.
+ * @param {object[]} doclets 原生节点，非数组时为空。 / Native doclets, empty when not an array.
+ * @returns {object} standalone与integration两份既有投影。 / Existing standalone and integration projections.
+ */
 function buildOutputContract(state, doclets) {
   const sourceDoclets = Array.isArray(doclets) ? doclets : [];
   const standalone = buildStandaloneOutput(state, sourceDoclets);
@@ -510,6 +531,14 @@ function resolveIntegrationOutputFile(state) {
   return path.resolve(process.cwd(), outputFile);
 }
 
+/**
+ * @lang zh-CN 启用且配置输出路径时同步创建父目录并覆盖JSON；不替调用方授予写权限或清理任意旧文件。
+ * @lang en Synchronously creates parents and overwrites JSON when output is enabled and configured; grants no write permission and cleans no arbitrary stale files.
+ * @param {object} state 含integration.enabled/outputFile的配置状态。 / State configuring integration.enabled/outputFile.
+ * @param {object} integrationOutput 待序列化数据，应先按公开边界验证。 / Serializable data requiring prior publication-boundary checks.
+ * @returns {string} 实际绝对输出路径，未启用/未配置为空串。 / Actual absolute output path, empty when disabled/unconfigured.
+ * @throws {*} JSON序列化或同步文件I/O的本地错误。 / Local JSON serialization or synchronous file-I/O errors.
+ */
 function writeIntegrationOutput(state, integrationOutput) {
   if (!state.config.integration || !state.config.integration.enabled) {
     return "";
