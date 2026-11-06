@@ -128,6 +128,7 @@ test("built-in micro-plugin properties retain their own bilingual text and hook 
       const node = matches[0];
       assert.ok(node.i18n.fields.description.localizedText.en, `${plugin.name}.${name} English`);
       assert.ok(node.i18n.fields.description.localizedText["zh-CN"], `${plugin.name}.${name} 中文`);
+      assert.notEqual(node.i18n.fields.description.localizedText.en, node.i18n.fields.description.localizedText["zh-CN"], `${plugin.name}.${name} distinct locale prose`);
       if (typeof value === "function") {
         // <lang><zh-CN>当前内置钩子没有默认/rest参数，运行时长度可独立核参数标签和签名。</zh-CN><en>Current built-in hooks have no default/rest parameters, so runtime arity independently checks parameter tags and signatures.</en></lang>
         assert.equal(node.jsdoc.params.length, value.length);

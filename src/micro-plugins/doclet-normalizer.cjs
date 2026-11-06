@@ -7,12 +7,11 @@
  */
 
 /**
- * 构造 JPHS/JTH companion presentation profile，不引入文件路径、源码正文或 parser 私有结构。
- * Builds the JPHS/JTH companion presentation profile without adding file paths,
- * source bodies, or parser-private structures.
+ * @lang zh-CN 构造JPHS/JTH伴随展示元数据，不引入文件路径、源码正文或解析器私有结构。
+ * @lang en Builds JPHS/JTH companion presentation metadata without file paths, source bodies or parser-private structures.
  *
- * @param {object} doclet JSDoc 已归一化的文档节点 / Normalized JSDoc documentation node.
- * @returns {object} 公开安全且确定性的 presentation metadata / Public-safe deterministic presentation metadata.
+ * @param {object} doclet <lang><zh-CN>JSDoc已归一化的文档节点。</zh-CN><en>Normalized JSDoc documentation node.</en></lang>
+ * @returns {object} <lang><zh-CN>公开安全且确定性的展示元数据。</zh-CN><en>Public-safe deterministic presentation metadata.</en></lang>
  */
 function buildPresentationMetadata(doclet) {
   // <lang><zh-CN>缺kind时使用既有unknown占位，只影响展示元数据。</zh-CN><en>A missing kind uses the existing unknown placeholder for presentation metadata only.</en></lang>
@@ -52,13 +51,12 @@ module.exports = {
   order: 50,
 
   /**
-   * 将 JSDoc identity/containment 投影到 companion metadata；它不推断 inheritance 或 composition。
-   * Projects JSDoc identity/containment into companion metadata; it does not infer
-   * inheritance or composition.
+   * @lang zh-CN 将JSDoc身份和包含关系投影到伴随元数据，不推断继承或组合关系。
+   * @lang en Projects JSDoc identity and containment into companion metadata without inferring inheritance or composition.
    *
-   * @param {object} event JSDoc newDoclet event / JSDoc newDoclet event.
-   * @param {object} context 插件执行上下文 / Plugin execution context.
-   * @returns {void}
+   * @param {object} event <lang><zh-CN>可缺doclet的JSDoc新节点事件。</zh-CN><en>JSDoc new-node event whose doclet may be absent.</en></lang>
+   * @param {object} context <lang><zh-CN>持有当前节点元数据的受信执行上下文。</zh-CN><en>Trusted execution context holding current-node metadata.</en></lang>
+   * @returns {void} <lang><zh-CN>就地更新身份与展示提示，无返回值。</zh-CN><en>Updates identity and presentation hints in place and returns nothing.</en></lang>
    */
   newDoclet(event, context) {
     // <lang><zh-CN>缺doclet时不创建身份，保留原事件不变。</zh-CN><en>Create no identity when the doclet is absent, leaving the event unchanged.</en></lang>
