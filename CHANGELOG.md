@@ -2,6 +2,9 @@
 
 ## 1.0.0 source candidate
 
+- 中文：为协议常量、输出命名空间和内置插件数组补齐逐节点双语原生注释，并验证冻结对象属性的语言正文与来源。
+- English: Document contract constants, the output namespace and the built-in plugin array bilingually, with native verification of frozen-object property text and sources.
+
 - 中文：补齐嵌套输出构造器的逐方法原生注释，并以真实JSDoc覆盖对象方法、箭头属性及预览禁用签名反例；运行行为、签名算法和wire不变。
 - English: Document nested output builders individually and exercise object methods, arrow properties and disabled-preview signatures through real JSDoc, without changing runtime behavior, the signature algorithm or wire identities.
 

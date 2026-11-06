@@ -29,6 +29,13 @@ isolation does not establish a complete document or source-range proof.
 
 ## Nested compatibility surface
 
+Exported contract constants, the output-builder namespace and the built-in
+micro-plugin array carry their own bilingual JSDoc comments. Property
+documentation uses separate canonical `@lang` tags for each language so native
+JSDoc output retains each language's description.
+
+中文：导出的协议常量、输出构造器命名空间和内置微插件数组各自提供双语原生注释，每种语言使用独立的canonical @lang标签。
+
 Object methods and arrow-valued properties use the same verified native AST
 signature path as top-level functions. A parent object's description does not
 replace a method's own documentation. Exported output builders carry individual

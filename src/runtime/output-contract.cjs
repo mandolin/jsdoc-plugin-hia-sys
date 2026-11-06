@@ -6,8 +6,20 @@ const { normalizeOpenMode } = require("./source.cjs");
 const { VERSION } = require("../version.cjs");
 const { buildCallableSignature } = require("./callable-signature.cjs");
 
+/**
+ * @lang zh-CN 独立主题及Integration输出采用的协议版本。
+ * @lang en Contract version used by standalone-theme and Integration outputs.
+ */
 const CONTRACT_VERSION = "0.1.0";
+/**
+ * @lang zh-CN 独立主题输出的中性协议身份。
+ * @lang en Neutral contract identity of standalone-theme output.
+ */
 const STANDALONE_CONTRACT = "jsdoc-plugin-hia-sys/standalone";
+/**
+ * @lang zh-CN JSDoc到HIA适配器读取的Integration协议身份。
+ * @lang en Integration contract identity read by the JSDoc-to-HIA adapter.
+ */
 const INTEGRATION_CONTRACT = "hia-jsdoc-integration";
 
 /**

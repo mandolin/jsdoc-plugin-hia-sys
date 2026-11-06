@@ -7,6 +7,10 @@
  */
 
 const { createPluginSystem } = require("./runtime/create-plugin-system.cjs");
+/**
+ * @lang zh-CN 嵌套公开接口引用的输出构造器及契约常量命名空间。
+ * @lang en Namespace of output builders and contract constants referenced by the nested public API.
+ */
 const outputContract = require("./runtime/output-contract.cjs");
 const { builtInMicroPlugins } = require("./micro-plugins/index.cjs");
 
@@ -66,6 +70,10 @@ exports.handlers = {
 exports._hia = {
   createPluginSystem,
   builtInMicroPlugins,
+  /**
+   * @lang zh-CN 公开的输出构造器及协议常量命名空间。
+   * @lang en Public namespace of output builders and contract constants.
+   */
   outputContract,
   /** @returns {object} 同一原始状态，可能含私有源码。 / Same raw state, potentially containing private source.
    * @lang zh-CN 只供受信本地调试，发布前必须经相应工件构造与验证。

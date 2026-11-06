@@ -83,3 +83,33 @@ test("nested member bilingual fields remain distinct from the parent description
   assert.equal(member.jsdoc.returns[0].type.names[0],"string");
   assert.notEqual(member.i18n.fields.description.localizedText.en,nodes.find(node=>node.name==="hooks").i18n.fields.description.localizedText.en);
 });
+
+test("frozen descriptor properties retain their own bilingual text and source",()=>{
+  const nodes = parse([
+    "/** Public descriptor. */",
+    "export const descriptor = Object.freeze({",
+    "/**",
+    " * @lang zh-CN 生产器协议身份。",
+    " * @lang en Producer contract identity.",
+    " */",
+    "contract: 'documentation-producer',",
+    "/**",
+    " * @lang zh-CN 来源关联能力。",
+    " * @lang en Source-linkage capabilities.",
+    " */",
+    "capabilities: {",
+    "/**",
+    " * @lang zh-CN 本次生产器支持来源关联。",
+    " * @lang en This producer supports source linkage.",
+    " */",
+    "sourceLinkage: true",
+    "}",
+    "});"
+  ].join("\n"));
+  const contract = nodes.find(node => node.name === "contract");
+  const sourceLinkage = nodes.find(node => node.name === "sourceLinkage");
+  assert.equal(contract.i18n.fields.description.localizedText.en, "Producer contract identity.");
+  assert.equal(contract.i18n.fields.description.localizedText["zh-CN"], "生产器协议身份。");
+  assert.equal(sourceLinkage.i18n.fields.description.localizedText.en, "This producer supports source linkage.");
+  assert.equal(sourceLinkage.source.definedIn.position.line, 17);
+});
