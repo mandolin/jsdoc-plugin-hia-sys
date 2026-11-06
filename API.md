@@ -105,6 +105,32 @@ unverified references are not promoted. The theme owns topic/page/source assets,
 while the shared parser/Portal owns conversion and combined rendering. The plugin
 does not independently certify generated TypeScript/Vue/Sass chains or visual UI.
 
+## Built-in micro-plugin declarations
+
+The shared `_hia.builtInMicroPlugins` array declares the following objects in
+source order. Every object exposes `name` and `order`, together with these hooks.
+The host filters configured names, sorts a copied list by `order`, and invokes
+enabled `setup` hooks while creating a system.
+
+| Object name | Declared order | Hooks |
+| --- | --- | --- |
+| `code-fragment` | 10 | `setup(context)`, `defineTags(event)`, `beforeParse(event, context)`, `newDoclet(event, context)`, `parseComplete(event, context)` |
+| `source-link` | 20 | `newDoclet(event, context)` |
+| `source-preview` | 30 | `newDoclet(event, context)` |
+| `doc-i18n` | 40 | `setup(context)`, `defineTags(event)`, `newDoclet(event, context)` |
+| `doclet-normalizer` | 50 | `newDoclet(event, context)` |
+| `hia-ir-exporter` | 110 | `parseComplete(event, context)`, `processingComplete(event, context)` |
+| `diagnostics` | 100 | `processingComplete(event, context)` |
+
+The array and objects are mutable shared references. Their declaration order
+describes the source initializer. Enabled execution order follows configuration
+and sorting. Hook source comments document actual effects and required context,
+and native JSDoc retains each property's bilingual text and each hook's signature.
+
+中文说明。内置数组按源码顺序保存7个对象，各对象均有名称和排序权重，共14个直接钩子。
+系统创建时按配置筛选并排序副本，立即调用已启用插件的setup。数组及对象保持共享可变引用，
+源码声明清单与实际启用顺序分别读取。逐属性注释、参数和副作用随对应钩子维护。
+
 ## Errors and Side effects
 
 Setup errors propagate synchronously. Hook failures add HIA_PLUGIN_HOOK_FAILED

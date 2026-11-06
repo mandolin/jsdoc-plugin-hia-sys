@@ -1,5 +1,11 @@
 "use strict";
 
+/**
+ * @file
+ * @lang zh-CN 字段国际化微插件，归并canonical语言标签、资源和旧兼容输入。
+ * @lang en Field-localization micro-plugin merging canonical language tags, resources and legacy inputs.
+ */
+
 const {
   getResourceEntry,
   loadLocalizationResources,
@@ -725,17 +731,43 @@ function buildGenerationData(localized, fields, context) {
   };
 }
 
+/**
+ * @lang zh-CN 国际化资源初始化、标签注册与字段投影钩子，输出遵循当前语言配置。
+ * @lang en Localization-resource setup, tag registration and field projection hooks governed by current locale configuration.
+ */
 module.exports = {
+  /**
+   * @lang zh-CN 配置筛选与节点标记使用的国际化插件名。
+   * @lang en Localization identity used for configuration filtering and node marking.
+   */
   name: "doc-i18n",
+  /**
+   * @lang zh-CN 在源码预览之后、节点归一化之前运行的排序权重40。
+   * @lang en Scheduling weight 40 runs after source preview and before doclet normalization.
+   */
   order: 40,
 
+  /**
+   * @lang zh-CN 按当前配置读取国际化资源并保存资源及词条；读取诊断进入上下文收集器，不向其它运行共享注册表。
+   * @lang en Loads localization resources from current configuration and retains resources and entries; read diagnostics go to the context collector and registries are not shared across runs.
+   * @param {object} context <lang><zh-CN>含本轮资源配置、诊断和注册表的受信上下文。</zh-CN><en>Trusted context holding this run's resource configuration, diagnostics and registries.</en></lang>
+   * @returns {void} <lang><zh-CN>更新上下文注册表，无返回值。</zh-CN><en>Updates context registries and returns nothing.</en></lang>
+   */
   setup(context) {
+    // <lang><zh-CN>加载结果只属于当前配置，资源正文不自动获得公开许可。</zh-CN><en>The load result belongs to current configuration; resource text gains no automatic publication authority.</en></lang>
     const loaded = loadLocalizationResources(context.config, context.diagnostics);
     context.state.registries.localizationResources = loaded.resources;
     context.state.registries.localizationEntries = loaded.entries;
   },
 
+  /**
+   * @lang zh-CN 注册canonical lang及既有身份/资源和兼容语言标签；缺有效词典时忽略，回调只记录原标签值。
+   * @lang en Registers canonical lang plus existing identity/resource and compatibility tags; invalid dictionaries are ignored and callbacks only record original tag values.
+   * @param {object} event <lang><zh-CN>含可变JSDoc标签词典的事件。</zh-CN><en>Event containing the mutable JSDoc tag dictionary.</en></lang>
+   * @returns {void} <lang><zh-CN>注册标签定义，无返回值。</zh-CN><en>Registers tag definitions and returns nothing.</en></lang>
+   */
   defineTags(event) {
+    // <lang><zh-CN>复用本次事件的词典，避免在无注册能力时产生旁路状态。</zh-CN><en>Reuse this event's dictionary, avoiding side state when registration is unavailable.</en></lang>
     const dictionary = event && event.dictionary;
 
     if (!dictionary || typeof dictionary.defineTag !== "function") {
@@ -744,28 +776,60 @@ module.exports = {
 
     dictionary.defineTag("hiaLocale", {
       canHaveValue: true,
+      /**
+       * @lang zh-CN 将当前标签原值记录到locale元数据，空标签保留既有空字符串回退。
+       * @lang en Records the original tag value in locale metadata, retaining the existing empty-string fallback.
+       * @param {object} doclet <lang><zh-CN>词典回调提供的原节点。</zh-CN><en>Original node supplied by the dictionary callback.</en></lang>
+       * @param {object} tag <lang><zh-CN>提供value或text的原标签。</zh-CN><en>Original tag supplying value or text.</en></lang>
+       * @returns {void} <lang><zh-CN>就地附加标签元数据。</zh-CN><en>Appends tag metadata in place.</en></lang>
+       */
       onTagged(doclet, tag) {
+        // <lang><zh-CN>仅保存输入值，语言解析及回退在后续字段构建阶段执行。</zh-CN><en>Retain input values only; locale parsing and fallback happen during subsequent field construction.</en></lang>
         rememberTag(doclet, "locale", tag.value || tag.text || "");
       }
     });
 
     dictionary.defineTag("hiaKey", {
       canHaveValue: true,
+      /**
+       * @lang zh-CN 将当前标签原值记录到key元数据，空标签保留既有空字符串回退。
+       * @lang en Records the original tag value in key metadata, retaining the existing empty-string fallback.
+       * @param {object} doclet <lang><zh-CN>词典回调提供的原节点。</zh-CN><en>Original node supplied by the dictionary callback.</en></lang>
+       * @param {object} tag <lang><zh-CN>提供value或text的原标签。</zh-CN><en>Original tag supplying value or text.</en></lang>
+       * @returns {void} <lang><zh-CN>就地附加标签元数据。</zh-CN><en>Appends tag metadata in place.</en></lang>
+       */
       onTagged(doclet, tag) {
+        // <lang><zh-CN>仅保存输入值，语言解析及回退在后续字段构建阶段执行。</zh-CN><en>Retain input values only; locale parsing and fallback happen during subsequent field construction.</en></lang>
         rememberTag(doclet, "key", tag.value || tag.text || "");
       }
     });
 
     dictionary.defineTag("hiaPath", {
       canHaveValue: true,
+      /**
+       * @lang zh-CN 将当前标签原值记录到path元数据，空标签保留既有空字符串回退。
+       * @lang en Records the original tag value in path metadata, retaining the existing empty-string fallback.
+       * @param {object} doclet <lang><zh-CN>词典回调提供的原节点。</zh-CN><en>Original node supplied by the dictionary callback.</en></lang>
+       * @param {object} tag <lang><zh-CN>提供value或text的原标签。</zh-CN><en>Original tag supplying value or text.</en></lang>
+       * @returns {void} <lang><zh-CN>就地附加标签元数据。</zh-CN><en>Appends tag metadata in place.</en></lang>
+       */
       onTagged(doclet, tag) {
+        // <lang><zh-CN>仅保存输入值，语言解析及回退在后续字段构建阶段执行。</zh-CN><en>Retain input values only; locale parsing and fallback happen during subsequent field construction.</en></lang>
         rememberTag(doclet, "path", tag.value || tag.text || "");
       }
     });
 
     dictionary.defineTag("lang", {
       canHaveValue: true,
+      /**
+       * @lang zh-CN 将当前标签原值记录到lang元数据，空标签保留既有空字符串回退。
+       * @lang en Records the original tag value in lang metadata, retaining the existing empty-string fallback.
+       * @param {object} doclet <lang><zh-CN>词典回调提供的原节点。</zh-CN><en>Original node supplied by the dictionary callback.</en></lang>
+       * @param {object} tag <lang><zh-CN>提供value或text的原标签。</zh-CN><en>Original tag supplying value or text.</en></lang>
+       * @returns {void} <lang><zh-CN>就地附加标签元数据。</zh-CN><en>Appends tag metadata in place.</en></lang>
+       */
       onTagged(doclet, tag) {
+        // <lang><zh-CN>仅保存输入值，语言解析及回退在后续字段构建阶段执行。</zh-CN><en>Retain input values only; locale parsing and fallback happen during subsequent field construction.</en></lang>
         appendTag(doclet, "lang", tag.value || tag.text || "");
       }
     });
@@ -774,35 +838,67 @@ module.exports = {
     // Legacy tags are not deprecated yet and remain read-compatible; new docs must use @lang / <lang>.
     dictionary.defineTag("hiaText", {
       canHaveValue: true,
+      /**
+       * @lang zh-CN 将当前标签原值记录到text元数据，空标签保留既有空字符串回退。
+       * @lang en Records the original tag value in text metadata, retaining the existing empty-string fallback.
+       * @param {object} doclet <lang><zh-CN>词典回调提供的原节点。</zh-CN><en>Original node supplied by the dictionary callback.</en></lang>
+       * @param {object} tag <lang><zh-CN>提供value或text的原标签。</zh-CN><en>Original tag supplying value or text.</en></lang>
+       * @returns {void} <lang><zh-CN>就地附加标签元数据。</zh-CN><en>Appends tag metadata in place.</en></lang>
+       */
       onTagged(doclet, tag) {
+        // <lang><zh-CN>仅保存输入值，语言解析及回退在后续字段构建阶段执行。</zh-CN><en>Retain input values only; locale parsing and fallback happen during subsequent field construction.</en></lang>
         appendTag(doclet, "text", tag.value || tag.text || "");
       }
     });
 
     dictionary.defineTag("hiaBlock", {
       canHaveValue: true,
+      /**
+       * @lang zh-CN 将当前标签原值记录到block元数据，空标签保留既有空字符串回退。
+       * @lang en Records the original tag value in block metadata, retaining the existing empty-string fallback.
+       * @param {object} doclet <lang><zh-CN>词典回调提供的原节点。</zh-CN><en>Original node supplied by the dictionary callback.</en></lang>
+       * @param {object} tag <lang><zh-CN>提供value或text的原标签。</zh-CN><en>Original tag supplying value or text.</en></lang>
+       * @returns {void} <lang><zh-CN>就地附加标签元数据。</zh-CN><en>Appends tag metadata in place.</en></lang>
+       */
       onTagged(doclet, tag) {
+        // <lang><zh-CN>仅保存输入值，语言解析及回退在后续字段构建阶段执行。</zh-CN><en>Retain input values only; locale parsing and fallback happen during subsequent field construction.</en></lang>
         appendTag(doclet, "block", tag.value || tag.text || "");
       }
     });
   },
 
+  /**
+   * @lang zh-CN 将原doclet文本、语言标签与配置资源归并为字段级国际化元数据，按现有回退策略记录缺译；缺doclet时忽略。
+   * @lang en Merges original doclet text, language tags and configured resources into field-level localization metadata, recording missing locales under existing fallback rules; missing doclets are ignored.
+   * @param {object} event <lang><zh-CN>携带原doclet及其标签的新节点事件。</zh-CN><en>New-node event carrying the original doclet and its tags.</en></lang>
+   * @param {object} context <lang><zh-CN>含语言配置、资源和诊断的受信上下文。</zh-CN><en>Trusted context holding locale configuration, resources and diagnostics.</en></lang>
+   * @returns {void} <lang><zh-CN>就地更新国际化字段及诊断，无返回值。</zh-CN><en>Updates localization fields and diagnostics in place and returns nothing.</en></lang>
+   */
   newDoclet(event, context) {
     if (!event || !event.doclet) {
       return;
     }
 
+    // <lang><zh-CN>原事件节点保留JSDoc身份，不复制解析器私有状态。</zh-CN><en>The original event node retains JSDoc identity without copying private parser state.</en></lang>
     const doclet = event.doclet;
+    // <lang><zh-CN>同一节点元数据承接字段结果，插件标记供后续审计。</zh-CN><en>The same node metadata receives field results; the plugin mark supports later auditing.</en></lang>
     const metadata = context.markMicroPlugin(doclet, this.name);
+    // <lang><zh-CN>原标签缺失时使用本地空对象，仅作为当前投影输入。</zh-CN><en>Missing original tags use a local empty object as projection input only.</en></lang>
     const tags = doclet.hiaTags || {};
+    // <lang><zh-CN>查询键由原节点和标签构造，供授权资源查找使用。</zh-CN><en>The lookup key comes from the original node and tags for authorized-resource lookup.</en></lang>
     const key = buildLocalizationKey(doclet, tags);
+    // <lang><zh-CN>描述块保留原正文和显式语言信息，随后合并配置资源。</zh-CN><en>Description blocks retain original prose and explicit locale data before configured resources are merged.</en></lang>
     const descriptionBlocks = buildDescriptionBlocks(doclet, tags, context);
 
     addResourceBlocks(descriptionBlocks, key, context);
 
+    // <lang><zh-CN>字段集合包含参数和返回等已有语义，不将全部正文压成单一摘要。</zh-CN><en>The field collection includes existing parameter and return semantics without collapsing prose into one summary.</en></lang>
     const fields = buildFields(doclet, descriptionBlocks, context);
+    // <lang><zh-CN>描述字段可缺失，兼容投影与缺译诊断据此分别处理。</zh-CN><en>The description field may be absent; compatibility projection and missing-locale diagnostics handle that independently.</en></lang>
     const descriptionField = fields.description || null;
+    // <lang><zh-CN>兼容视图来自同一描述字段，保留旧消费者读取能力。</zh-CN><en>The compatibility view derives from the same description field for existing readers.</en></lang>
     const localized = buildCompatLocalized(descriptionField, context);
+    // <lang><zh-CN>仅显式国际化意图且有描述字段时记录其缺失语言。</zh-CN><en>Record missing locales only for explicit localization intent with a description field.</en></lang>
     const missingLocales = hasLocalizationIntent(tags) && descriptionField
       ? descriptionField.missingLocales
       : [];

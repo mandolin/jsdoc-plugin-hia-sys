@@ -113,3 +113,26 @@ test("frozen descriptor properties retain their own bilingual text and source",(
   assert.equal(sourceLinkage.i18n.fields.description.localizedText.en, "This producer supports source linkage.");
   assert.equal(sourceLinkage.source.definedIn.position.line, 17);
 });
+
+test("built-in micro-plugin properties retain their own bilingual text and hook signatures", () => {
+  // <lang><zh-CN>真实源文件和运行导出的键各自限定期望，不能用父对象正文替代子属性。</zh-CN><en>Actual sources and runtime-exported keys independently constrain expectations; parent prose cannot substitute for property documentation.</en></lang>
+  const plugins = require("../src/micro-plugins/index.cjs").builtInMicroPlugins;
+  for (const plugin of plugins) {
+    // <lang><zh-CN>源仅交原生JSDoc解析，读取本仓既有实现核键与参数数量。</zh-CN><en>Sources go only to native JSDoc parsing; existing owned implementations establish keys and argument counts.</en></lang>
+    const source = fs.readFileSync(path.join(__dirname, "../src/micro-plugins", `${plugin.name}.cjs`), "utf8");
+    const nodes = parse(source);
+    for (const [name, value] of Object.entries(plugin)) {
+      // <lang><zh-CN>公开对象的每个直接属性须有唯一原生节点，双语正文和真实签名分别核验。</zh-CN><en>Every direct public property needs a unique native node, with bilingual prose and actual signatures checked separately.</en></lang>
+      const matches = nodes.filter(node => node.name === name);
+      assert.equal(matches.length, 1, `${plugin.name}.${name}`);
+      const node = matches[0];
+      assert.ok(node.i18n.fields.description.localizedText.en, `${plugin.name}.${name} English`);
+      assert.ok(node.i18n.fields.description.localizedText["zh-CN"], `${plugin.name}.${name} 中文`);
+      if (typeof value === "function") {
+        // <lang><zh-CN>当前内置钩子没有默认/rest参数，运行时长度可独立核参数标签和签名。</zh-CN><en>Current built-in hooks have no default/rest parameters, so runtime arity independently checks parameter tags and signatures.</en></lang>
+        assert.equal(node.jsdoc.params.length, value.length);
+        assert.equal(node.signature, `${name}(${node.jsdoc.params.map(param => param.name).join(", ")}) → void`);
+      }
+    }
+  }
+});

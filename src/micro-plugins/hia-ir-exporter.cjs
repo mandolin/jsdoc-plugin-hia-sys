@@ -1,5 +1,11 @@
 "use strict";
 
+/**
+ * @file
+ * @lang zh-CN IR导出微插件，协调解析缓存、Integration和可选文档源码地图。
+ * @lang en IR export micro-plugin coordinating parse caches, Integration and optional documentation source maps.
+ */
+
 const path = require("node:path");
 const {
   buildOutputContract,
@@ -48,8 +54,20 @@ function toNode(doclet, context) {
   };
 }
 
+/**
+ * @lang zh-CN 解析完成与最终写入钩子，文件写入服从已配置输出和公开安全错误策略。
+ * @lang en Parse-completion and final-output hooks, with file writes governed by configured outputs and public-safe errors.
+ */
 module.exports = {
+  /**
+   * @lang zh-CN 配置筛选与失败诊断使用的IR导出插件名。
+   * @lang en IR-export identity used for configuration filtering and failure diagnostics.
+   */
   name: "hia-ir-exporter",
+  /**
+   * @lang zh-CN 在诊断汇总之后运行的最终导出排序权重110。
+   * @lang en Final-export scheduling weight 110 runs after diagnostic aggregation.
+   */
   order: 110,
 
   /**
@@ -60,6 +78,7 @@ module.exports = {
    * @returns {void} 更新内部状态。 / Updates internal state.
    */
   parseComplete(event, context) {
+    // <lang><zh-CN>缓存本次事件的节点引用，缺数组时使用空列表供最终阶段回退。</zh-CN><en>Cache this event's node references, using an empty list when absent for final-stage fallback.</en></lang>
     const doclets = event && Array.isArray(event.doclets) ? event.doclets : [];
 
     context.state.doclets = doclets;
@@ -80,6 +99,7 @@ module.exports = {
   processingComplete(event, context) {
     // <lang><zh-CN>新映射开启时先清理上轮 sidecar；即使投影或 integration 写入失败也不得留下旧成功文件。</zh-CN><en>When the new map is enabled, clear a prior sidecar first so projection or integration failures cannot leave a stale success file.</en></lang>
     const mapEnabled = context.config.docSourceMap?.enabled === true;
+    // <lang><zh-CN>仅地图开启时解析计划路径，用于先清理本次目标旁的旧侧车。</zh-CN><en>Resolve the planned path only when maps are enabled, to clear the old sidecar beside this run's target.</en></lang>
     const plannedFile = mapEnabled ? resolveIntegrationOutputFile(context.state) : "";
     if (mapEnabled) delete context.state.output.docSourceMapOutputFile;
     if (plannedFile) {
@@ -95,6 +115,7 @@ module.exports = {
     const doclets = event && Array.isArray(event.doclets)
       ? event.doclets
       : context.state.doclets;
+    // <lang><zh-CN>由同一最终节点集合构造现有独立输出与Integration，不以缓存替换有效事件。</zh-CN><en>Build existing standalone and Integration outputs from the same final nodes, without substituting cached nodes for valid events.</en></lang>
     const output = buildOutputContract(context.state, doclets);
 
     context.state.output.standalone = output.standalone;
@@ -103,6 +124,7 @@ module.exports = {
     context.state.integration.ir = output.integration.ir;
 
     try {
+      // <lang><zh-CN>写者返回实际写入文件名；禁用输出时的空值决定地图诊断分支。</zh-CN><en>The writer returns the actual output filename; an empty value when disabled determines map diagnostics.</en></lang>
       const writtenFile = writeIntegrationOutput(context.state, output.integration);
 
       if (writtenFile) {
