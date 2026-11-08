@@ -20,7 +20,7 @@ const system = createPluginSystem({
 });
 
 /**
- * @param {object} dictionary JSDoc可变tag词典。 / Mutable JSDoc tag dictionary.
+ * @param {object} dictionary <lang><zh-CN>JSDoc可变tag词典。</zh-CN><en>Mutable JSDoc tag dictionary.</en></lang>
  * @lang zh-CN 向JSDoc注册已启用tag，委派错误遵循工厂策略；无返回值。
  * @lang en Registers enabled tags with JSDoc; delegated errors follow factory policy; returns nothing.
  */
@@ -33,28 +33,28 @@ exports.defineTags = function defineTags(dictionary) {
  * @lang en Standard JSDoc callback object with mutable events and configuration-enabled outputs.
  */
 exports.handlers = {
-  /** @param {object} event filename/source事件。 / filename/source event.
+  /** @param {object} event <lang><zh-CN>filename/source事件。</zh-CN><en>filename/source event.</en></lang>
    * @lang zh-CN 在解析前收集上游源及片段，保留生成链关联。
    * @lang en Collects upstream source/fragments before parsing, retaining generation-chain links.
    */
   beforeParse(event) {
     system.handle("beforeParse", event);
   },
-  /** @param {object} event doclet事件。 / Doclet event.
+  /** @param {object} event <lang><zh-CN>doclet事件。</zh-CN><en>Doclet event.</en></lang>
    * @lang zh-CN 补充当前doclet的源/i18n元数据，修改同一事件对象。
    * @lang en Enriches the current doclet with source/i18n metadata, mutating the same event object.
    */
   newDoclet(event) {
     system.handle("newDoclet", event);
   },
-  /** @param {object} event 已解析doclets。 / Parsed doclets.
+  /** @param {object} event <lang><zh-CN>已解析doclets。</zh-CN><en>Parsed doclets.</en></lang>
    * @lang zh-CN 汇总引用、字段与IR，不改变源码范围的既有精度规则。
    * @lang en Resolves references, fields and IR without changing existing source-range precision rules.
    */
   parseComplete(event) {
     system.handle("parseComplete", event);
   },
-  /** @param {object} event 处理完成事件。 / Processing-complete event.
+  /** @param {object} event <lang><zh-CN>处理完成事件。</zh-CN><en>Processing-complete event.</en></lang>
    * @lang zh-CN 按配置写Integration及可选源码映射；I/O与hook错误遵循既有策略。
    * @lang en Writes configured Integration and optional source maps; I/O and hook failures follow existing policy.
    */
@@ -75,7 +75,7 @@ exports._hia = {
    * @lang en Public namespace of output builders and contract constants.
    */
   outputContract,
-  /** @returns {object} 同一原始状态，可能含私有源码。 / Same raw state, potentially containing private source.
+  /** @returns {object} <lang><zh-CN>同一原始状态，可能含私有源码。</zh-CN><en>Same raw state, potentially containing private source.</en></lang>
    * @lang zh-CN 只供受信本地调试，发布前必须经相应工件构造与验证。
    * @lang en For trusted local debugging; publication requires the appropriate artifact construction and validation.
    */

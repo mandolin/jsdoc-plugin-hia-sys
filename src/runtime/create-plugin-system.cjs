@@ -62,8 +62,8 @@ function filterEnabledMicroPlugins(microPlugins, config) {
 /**
  * @lang zh-CN 创建独立的受信微插件系统；默认配置、JSDoc环境配置、显式覆盖依次合并，setup立即执行。
  * @lang en Creates an independent trusted micro-plugin system; merges defaults, JSDoc environment and explicit overrides in order, executing setup immediately.
- * @param {object} [options] 微插件列表和configOverrides。 / Micro-plugin list and configOverrides.
- * @returns {object} defineTags/handle/getState/getMicroPlugins接口；state为本系统可变引用。 / defineTags/handle/getState/getMicroPlugins surface; state is this system's mutable reference.
+ * @param {object} [options] <lang><zh-CN>微插件列表和configOverrides。</zh-CN><en>Micro-plugin list and configOverrides.</en></lang>
+ * @returns {object} <lang><zh-CN>defineTags/handle/getState/getMicroPlugins接口；state为本系统可变引用。</zh-CN><en>defineTags/handle/getState/getMicroPlugins surface; state is this system's mutable reference.</en></lang>
  * @throws {*} setup原抛值或throwOnError开启时的hook原抛值，不自动脱敏本地重抛。 / Original thrown setup/hook values when throwOnError applies; local rethrows are not automatically redacted.
  */
 function createPluginSystem(options) {

@@ -10,12 +10,13 @@ const {spawnSync}=require("node:child_process");
 /**
  * @lang zh-CN 在仅本测试拥有的临时根运行原生解析，返回实际integration节点并清理已核实的根。
  * @lang en Runs native parsing under a test-owned temporary root, returns actual integration nodes and removes only the verified root.
- * @param {string} source 中性测试源码。 / Neutral fixture source.
- * @param {object} [sourceOptions] 已有源码配置。 / Existing source configuration.
- * @param {boolean} [rewrite=false] 模拟后续插件改写解析输入。 / Simulates a later plugin rewriting parser input.
- * @returns {object[]} 实际原生节点。 / Actual native nodes.
+ * @param {string} source <lang><zh-CN>中性测试源码。</zh-CN><en>Neutral fixture source.</en></lang>
+ * @param {object} [sourceOptions] <lang><zh-CN>已有源码配置。</zh-CN><en>Existing source configuration.</en></lang>
+ * @param {boolean} [rewrite=false] <lang><zh-CN>模拟后续插件改写解析输入。</zh-CN><en>Simulates a later plugin rewriting parser input.</en></lang>
+ * @param {boolean} [mapEnabled=false] <lang><zh-CN>显式生成并核对同轮地图。</zh-CN><en>Explicitly generates and checks a same-run map.</en></lang>
+ * @returns {object[]} <lang><zh-CN>实际原生节点。</zh-CN><en>Actual native nodes.</en></lang>
  */
-function parse(source,sourceOptions={},rewrite=false) {
+function parse(source,sourceOptions={},rewrite=false,mapEnabled=false) {
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"hia-callable-"));
   try {
     const file=path.join(root,"sample.mjs");
@@ -24,10 +25,17 @@ function parse(source,sourceOptions={},rewrite=false) {
     fs.writeFileSync(file,source);
     const plugins=[path.resolve(__dirname,"../src/index.cjs")];
     if(rewrite) {const rewriter=path.join(root,"rewrite.cjs");fs.writeFileSync(rewriter,"exports.handlers={beforeParse(e){e.source+='\\n';}};");plugins.push(rewriter);}
-    fs.writeFileSync(config,JSON.stringify({plugins,source:{include:[file],includePattern:".+\\.mjs$"},opts:{hia:{mode:"hiaIntegration",source:{basePath:root,preview:{enabled:true},...sourceOptions},i18n:{enabled:true,defaultLocale:"en",fallbackLocale:"en",locales:["en","zh-CN"]},integration:{enabled:true,outputFile:output}}}}));
+    fs.writeFileSync(config,JSON.stringify({plugins,source:{include:[file],includePattern:".+\\.mjs$"},opts:{hia:{mode:"hiaIntegration",source:{basePath:root,preview:{enabled:true},...sourceOptions},i18n:{enabled:true,defaultLocale:"en",fallbackLocale:"en",locales:["en","zh-CN"]},integration:{enabled:true,outputFile:output},docSourceMap:{enabled:mapEnabled}}}}));
     const result=spawnSync(process.execPath,[require.resolve("jsdoc/jsdoc.js"),"-c",config,"-X"],{cwd:root,encoding:"utf8",shell:false,maxBuffer:4*1024*1024});
     assert.equal(result.status,0,result.stderr);
-    return JSON.parse(fs.readFileSync(output)).ir.nodes;
+    // <lang><zh-CN>实际Integration节点作为地图身份与顺序的唯一比较基准。</zh-CN><en>Actual Integration nodes are the sole comparison baseline for map identities and order.</en></lang>
+    const nodes = JSON.parse(fs.readFileSync(output)).ir.nodes;
+    if (mapEnabled) {
+      // <lang><zh-CN>固定侧车来自同一临时输出根，缺失或顺序变化必须失败。</zh-CN><en>The fixed sidecar belongs to the same temporary output root, with absence or reordered entries failing the check.</en></lang>
+      const map = JSON.parse(fs.readFileSync(path.join(root, require("../src/runtime/doc-source-map.cjs").DOC_SOURCE_MAP_FILE)));
+      assert.deepEqual(map.entries.map((entry) => entry.symbolId), nodes.map((node) => node.id));
+    }
+    return nodes;
   } finally {
     // <lang><zh-CN>只删除已核实为系统临时目录直属子目录且带本测试前缀的根。</zh-CN><en>Remove only a verified direct child of the system temporary directory with this test's prefix.</en></lang>
     const actual=fs.realpathSync.native(root);
@@ -47,6 +55,22 @@ test("arrow parameters use native ranges even when a default contains an arrow b
 });
 test("missing param tags never produce a false empty argument list",()=>{
   assert.equal(parse('/** actual */\nexport function actual(first, second) {return first;}').find(node=>node.name==="actual").signature,"actual(first, second)");
+});
+
+/**
+ * @lang zh-CN 已授权源码证明的签名应独立保留，语言诊断消失后仍有实际内容。
+ * @lang en Authorized source-proven signatures retain actual content independently of locale diagnostics.
+ */
+test("source-proven signatures survive without prose or locale diagnostics", () => {
+  // <lang><zh-CN>夹具只有真实函数声明，避免正文或标签使内容分数偶然为正。</zh-CN><en>The fixture contains only a real function declaration so prose or tags cannot accidentally produce a positive content score.</en></lang>
+  const nodes = parse("export function signatureOnly(value) { return value; }", {}, false, true);
+  // <lang><zh-CN>按真实声明名定位，缺节点须显式失败而非跳过签名断言。</zh-CN><en>Locate the real declaration by name and fail explicitly when absent instead of skipping signature assertions.</en></lang>
+  const node = nodes.find((candidate) => candidate.name === "signatureOnly");
+  assert.ok(node);
+  assert.equal(node.signature, "signatureOnly(value)");
+  assert.equal(node.summary, "");
+  assert.deepEqual(node.i18n.fields, {});
+  assert.deepEqual(node.diagnostics, []);
 });
 test("disabled source previews and source mode none omit source-derived signatures",()=>{
   for(const options of [{preview:{enabled:false}},{mode:"none"},{mode:"unknown"},{preview:{enabled:"true"}}]) assert.equal(parse('/** denied */\nexport function denied(secret = "SOURCE_DEFAULT") {}',options).find(node=>node.name==="denied").signature,undefined);

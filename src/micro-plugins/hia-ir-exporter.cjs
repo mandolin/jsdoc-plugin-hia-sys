@@ -73,9 +73,9 @@ module.exports = {
   /**
    * @lang zh-CN 缓存 parseComplete 的 doclet 与解析阶段 IR，供最终处理阶段回退使用。
    * @lang en Caches parseComplete doclets and parse-stage IR for fallback in the final processing stage.
-   * @param {object} event JSDoc parseComplete 事件。 / JSDoc parseComplete event.
-   * @param {object} context 插件上下文。 / Plugin context.
-   * @returns {void} 更新内部状态。 / Updates internal state.
+   * @param {object} event <lang><zh-CN>JSDoc parseComplete 事件。</zh-CN><en>JSDoc parseComplete event.</en></lang>
+   * @param {object} context <lang><zh-CN>插件上下文。</zh-CN><en>Plugin context.</en></lang>
+   * @returns {void} <lang><zh-CN>更新内部状态。</zh-CN><en>Updates internal state.</en></lang>
    */
   parseComplete(event, context) {
     // <lang><zh-CN>缓存本次事件的节点引用，缺数组时使用空列表供最终阶段回退。</zh-CN><en>Cache this event's node references, using an empty list when absent for final-stage fallback.</en></lang>
@@ -92,9 +92,9 @@ module.exports = {
   /**
    * @lang zh-CN 写出既有 integration，并仅在显式启用时写独立 1.1.0 地图；地图失败通过固定诊断闭包。
    * @lang en Writes the legacy integration and, only when opted in, an independent 1.1.0 map; fixed diagnostics close map failures.
-   * @param {object} event JSDoc processingComplete 事件。 / JSDoc processingComplete event.
-   * @param {object} context 插件上下文。 / Plugin context.
-   * @returns {void} 更新内部状态并可能写入文件。 / Updates state and may write files.
+   * @param {object} event <lang><zh-CN>JSDoc processingComplete 事件。</zh-CN><en>JSDoc processingComplete event.</en></lang>
+   * @param {object} context <lang><zh-CN>插件上下文。</zh-CN><en>Plugin context.</en></lang>
+   * @returns {void} <lang><zh-CN>更新内部状态并可能写入文件。</zh-CN><en>Updates state and may write files.</en></lang>
    */
   processingComplete(event, context) {
     // <lang><zh-CN>新映射开启时先清理上轮 sidecar；即使投影或 integration 写入失败也不得留下旧成功文件。</zh-CN><en>When the new map is enabled, clear a prior sidecar first so projection or integration failures cannot leave a stale success file.</en></lang>
@@ -138,6 +138,8 @@ module.exports = {
               sourceFiles: context.state.sourceFiles,
               sourceRoot: context.config.source.basePath || process.cwd(),
               metadataKey: context.config.metadataKey,
+              // <lang><zh-CN>保持与Integration相同的源码授权及签名内容判定，避免地图二次选择漏掉签名节点。</zh-CN><en>Retain Integration's source authorization and signature-content decisions so map reselection keeps signature nodes.</en></lang>
+              projectionState: context.state,
               artifactPath: path.basename(writtenFile)
             });
             context.state.output.docSourceMapOutputFile = writeJsdocDocSourceMap(map, writtenFile);

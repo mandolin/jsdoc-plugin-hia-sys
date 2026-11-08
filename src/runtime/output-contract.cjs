@@ -95,8 +95,20 @@ function countI18nFieldContent(fields) {
   return count;
 }
 
+/**
+ * @lang zh-CN 按实际文档内容为同身份候选排序，已授权源码证明的非空签名也独立构成内容。
+ * @lang en Ranks same-identity candidates by actual documentation content, including nonempty signatures proven from authorized source.
+ * @param {object} node <lang><zh-CN>已投影的内部候选节点。</zh-CN><en>Projected internal candidate node.</en></lang>
+ * @returns {number} <lang><zh-CN>非负内容权重，仅真实空节点为零。</zh-CN><en>Nonnegative content weight, with zero reserved for content-free nodes.</en></lang>
+ */
 function scoreIntegrationNode(node) {
+  // <lang><zh-CN>权重仅在本次候选比较中累积，保持已有正文与字段优先级。</zh-CN><en>The weight accumulates only for this candidate comparison, retaining existing prose and field priorities.</en></lang>
   let score = 0;
+
+  // <lang><zh-CN>真实非空签名提供最小权重，语言告警消失后仍保留对应函数节点。</zh-CN><en>A real nonempty signature contributes the minimum weight so its function node survives after locale warnings disappear.</en></lang>
+  if (typeof node.signature === "string" && node.signature.trim()) {
+    score += 1;
+  }
 
   if (node.summary) {
     score += 100;
@@ -132,9 +144,9 @@ function hasIntegrationNodeContent(node) {
 /**
  * @lang zh-CN 为 integration 按节点 ID 择优保留一份 doclet 与投影节点；同分数保留首次出现者，供独立地图沿用同一身份与顺序。
  * @lang en Selects one doclet and projected node per integration ID; equal scores keep the first occurrence so an independent map can reuse the same identity and order.
- * @param {object[]} doclets 最终 JSDoc 文档节点。 / Final JSDoc doclets.
- * @param {object} state 仅需包含配置的插件状态。 / Plugin state containing configuration.
- * @returns {Array<{doclet:object,node:object}>} 按首次节点 ID 出现顺序排列的配对。 / Pairs in first-seen node ID order.
+ * @param {object[]} doclets <lang><zh-CN>最终 JSDoc 文档节点。</zh-CN><en>Final JSDoc doclets.</en></lang>
+ * @param {object} state <lang><zh-CN>仅需包含配置的插件状态。</zh-CN><en>Plugin state containing configuration.</en></lang>
+ * @returns {Array<{doclet:object,node:object}>} <lang><zh-CN>按首次节点 ID 出现顺序排列的配对。</zh-CN><en>Pairs in first-seen node ID order.</en></lang>
  */
 function buildIntegrationEntries(doclets, state) {
   // <lang><zh-CN>结果顺序按首次节点 ID 固定，索引负责同身份候选替换。</zh-CN><en>Result order follows the first occurrence of each node ID; indexes support replacement by a stronger candidate.</en></lang>
@@ -368,8 +380,8 @@ function getDiagnostics(state) {
  * identity, preferences, and owner boundaries; it is not the complete neutral profile and contains no DOM, CSS, source
  * body, or runtime callback.
  *
- * @param {object} state 插件状态。 / Plugin state.
- * @returns {object} 可公开序列化的 owner handoff descriptor。 / Publicly serializable owner handoff descriptor.
+ * @param {object} state <lang><zh-CN>插件状态。</zh-CN><en>Plugin state.</en></lang>
+ * @returns {object} <lang><zh-CN>可公开序列化的 owner handoff descriptor。</zh-CN><en>Publicly serializable owner handoff descriptor.</en></lang>
  */
 function buildPresentationHandoff(state) {
   // <lang><zh-CN>只接受 object-shaped 配置；异常输入采用冻结的规范默认值。</zh-CN><en>Accept only object-shaped configuration; malformed input uses the frozen normative defaults.</en></lang>
@@ -401,13 +413,11 @@ function buildPresentationHandoff(state) {
 }
 
 /**
- * 声明 standalone theme 的 metadata consumption surface，其中 presentation 仍为可选。
- * Declares the standalone theme metadata consumption surface, where
- * presentation remains optional.
- *
- * @param {object} state 插件状态 / Plugin state.
- * @param {Array<object>} doclets JSDoc 文档节点 / JSDoc documentation nodes.
- * @returns {object} theme contract descriptor / theme contract 描述对象.
+ * @lang zh-CN 声明独立主题的元数据消费接口，其中呈现配置保持可选。
+ * @lang en Declares the standalone theme metadata consumption surface, where presentation remains optional.
+ * @param {object} state <lang><zh-CN>插件状态</zh-CN><en>Plugin state.</en></lang>
+ * @param {Array<object>} doclets <lang><zh-CN>JSDoc 文档节点</zh-CN><en>JSDoc documentation nodes.</en></lang>
+ * @returns {object} <lang><zh-CN>theme contract 描述对象.</zh-CN><en>theme contract descriptor</en></lang>
  */
 function buildThemeContract(state, doclets) {
   return {
@@ -437,9 +447,9 @@ function buildThemeContract(state, doclets) {
 /**
  * @lang zh-CN 构造独立主题消费数据，不写盘；原始片段与状态需由调用方按公开边界处理。
  * @lang en Builds standalone-theme consumption data without writing; callers must handle raw fragments and state under publication boundaries.
- * @param {object} state 当前受信插件状态。 / Current trusted plugin state.
- * @param {object[]} doclets 本轮原生节点。 / Native doclets from this run.
- * @returns {object} 旧standalone契约投影，非脱敏后的任意状态快照。 / Existing standalone projection, not an arbitrary sanitized state snapshot.
+ * @param {object} state <lang><zh-CN>当前受信插件状态。</zh-CN><en>Current trusted plugin state.</en></lang>
+ * @param {object[]} doclets <lang><zh-CN>本轮原生节点。</zh-CN><en>Native doclets from this run.</en></lang>
+ * @returns {object} <lang><zh-CN>旧standalone契约投影，非脱敏后的任意状态快照。</zh-CN><en>Existing standalone projection, not an arbitrary sanitized state snapshot.</en></lang>
  */
 function buildStandaloneOutput(state, doclets) {
   return {
@@ -463,9 +473,9 @@ function buildStandaloneOutput(state, doclets) {
 /**
  * @lang zh-CN 按既有内容过滤和同身份择优构造Integration并清理结构；不写盘或更改契约版本。
  * @lang en Builds structurally sanitized Integration using existing content filtering and same-identity selection, without writing or changing its contract version.
- * @param {object} state 当前插件配置、源码证明和诊断。 / Current configuration, source proof and diagnostics.
- * @param {object[]} doclets 本轮原生节点，空合成节点仍按旧规则过滤。 / Native doclets; empty synthetic nodes retain existing filtering.
- * @returns {object} Integration0.1.0及已有字段/来源投影。 / Integration0.1.0 with existing field/source projections.
+ * @param {object} state <lang><zh-CN>当前插件配置、源码证明和诊断。</zh-CN><en>Current configuration, source proof and diagnostics.</en></lang>
+ * @param {object[]} doclets <lang><zh-CN>本轮原生节点，空合成节点仍按旧规则过滤。</zh-CN><en>Native doclets; empty synthetic nodes retain existing filtering.</en></lang>
+ * @returns {object} <lang><zh-CN>Integration0.1.0及已有字段/来源投影。</zh-CN><en>Integration0.1.0 with existing field/source projections.</en></lang>
  */
 function buildIntegrationOutput(state, doclets) {
   const integrationEntries = buildIntegrationEntries(doclets, state);
@@ -508,9 +518,9 @@ function buildIntegrationOutput(state, doclets) {
 /**
  * @lang zh-CN 组合独立主题与Integration投影；非数组节点输入按空数组，不执行文件写入。
  * @lang en Combines standalone and Integration projections, treating non-array doclets as empty and performing no file writes.
- * @param {object} state 当前受信插件状态。 / Current trusted plugin state.
- * @param {object[]} doclets 原生节点，非数组时为空。 / Native doclets, empty when not an array.
- * @returns {object} standalone与integration两份既有投影。 / Existing standalone and integration projections.
+ * @param {object} state <lang><zh-CN>当前受信插件状态。</zh-CN><en>Current trusted plugin state.</en></lang>
+ * @param {object[]} doclets <lang><zh-CN>原生节点，非数组时为空。</zh-CN><en>Native doclets, empty when not an array.</en></lang>
+ * @returns {object} <lang><zh-CN>standalone与integration两份既有投影。</zh-CN><en>Existing standalone and integration projections.</en></lang>
  */
 function buildOutputContract(state, doclets) {
   const sourceDoclets = Array.isArray(doclets) ? doclets : [];
@@ -526,8 +536,8 @@ function buildOutputContract(state, doclets) {
 /**
  * @lang zh-CN 按旧 integration 规则解析输出文件，供同级 sidecar 在写盘前清除残留。
  * @lang en Resolves the output file under existing integration rules so a sibling sidecar can clear stale output before writing.
- * @param {object} state 插件状态。 / Plugin state.
- * @returns {string} 绝对文件路径，或无配置时的空串。 / Absolute file path or empty string when not configured.
+ * @param {object} state <lang><zh-CN>插件状态。</zh-CN><en>Plugin state.</en></lang>
+ * @returns {string} <lang><zh-CN>绝对文件路径，或无配置时的空串。</zh-CN><en>Absolute file path or empty string when not configured.</en></lang>
  */
 function resolveIntegrationOutputFile(state) {
   const outputFile = state.config.integration && state.config.integration.outputFile;
@@ -546,9 +556,9 @@ function resolveIntegrationOutputFile(state) {
 /**
  * @lang zh-CN 启用且配置输出路径时同步创建父目录并覆盖JSON；不替调用方授予写权限或清理任意旧文件。
  * @lang en Synchronously creates parents and overwrites JSON when output is enabled and configured; grants no write permission and cleans no arbitrary stale files.
- * @param {object} state 含integration.enabled/outputFile的配置状态。 / State configuring integration.enabled/outputFile.
- * @param {object} integrationOutput 待序列化数据，应先按公开边界验证。 / Serializable data requiring prior publication-boundary checks.
- * @returns {string} 实际绝对输出路径，未启用/未配置为空串。 / Actual absolute output path, empty when disabled/unconfigured.
+ * @param {object} state <lang><zh-CN>含integration.enabled/outputFile的配置状态。</zh-CN><en>State configuring integration.enabled/outputFile.</en></lang>
+ * @param {object} integrationOutput <lang><zh-CN>待序列化数据，应先按公开边界验证。</zh-CN><en>Serializable data requiring prior publication-boundary checks.</en></lang>
+ * @returns {string} <lang><zh-CN>实际绝对输出路径，未启用/未配置为空串。</zh-CN><en>Actual absolute output path, empty when disabled/unconfigured.</en></lang>
  * @throws {*} JSON序列化或同步文件I/O的本地错误。 / Local JSON serialization or synchronous file-I/O errors.
  */
 function writeIntegrationOutput(state, integrationOutput) {

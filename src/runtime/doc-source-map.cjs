@@ -182,6 +182,7 @@ function exactAstRange(doclet, source) {
  * @lang zh-CN 用与 integration 相同的择优算法构造无源码正文的 1.1.0 地图，并拒绝两次投影顺序或身份不一致。
  * @lang en Uses the same selection algorithm as integration to build a source-free 1.1.0 map, rejecting projection-order or identity mismatches.
  * @param {object} options 同轮 integration、doclet、源码与根信息。 / Same-run integration, doclets, source records, and root.
+ * @param {object} [options.projectionState] <lang><zh-CN>内部生产器同轮投影状态，保留原源码授权与签名选择条件。</zh-CN><en>Internal producer's same-run projection state, retaining original source authorization and signature-selection conditions.</en></lang>
  * @returns {object} 独立文档源码映射工件。 / Independent documentation source-map artifact.
  * @throws {TypeError} integration 身份或选中结果不一致。 / If integration identity or selection differs.
  */
@@ -194,7 +195,8 @@ function buildJsdocDocSourceMap(options) {
   const metadataKey = options.metadataKey || "hia";
   // <lang><zh-CN>版本证据限定精度能力；未知 JSDoc 版本仍可消费节点身份与工件引用。</zh-CN><en>Version evidence gates precision; unknown JSDoc versions still provide node identity and artifact references.</en></lang>
   const jsdocVersion = typeof options.jsdocVersion === "string" ? options.jsdocVersion : getInstalledJsdocVersion();
-  const selected = buildIntegrationEntries(doclets, { config: { metadataKey } });
+  // <lang><zh-CN>内部生产路径复用同轮源码授权；独立旧调用保持仅元数据的选择默认值。</zh-CN><en>The internal producer reuses same-run source authorization, while existing independent calls retain metadata-only selection defaults.</en></lang>
+  const selected = buildIntegrationEntries(doclets, options.projectionState || { config: { metadataKey } });
   if (selected.length !== integration.ir.nodes.length || selected.some((item, index) => item.node.id !== integration.ir.nodes[index].id)) {
     throw new TypeError("JSDoc integration selection differs from source-map selection.");
   }
