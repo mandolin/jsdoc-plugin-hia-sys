@@ -1,0 +1,44 @@
+name: npm Trusted Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Audit or publish a coordinated candidate
+        type: choice
+        required: true
+        default: candidate-audit
+        options:
+          - candidate-audit
+          - candidate-publish
+      package_name:
+        description: Candidate package name; leave empty to audit all owned packages
+        required: false
+        type: string
+      confirm_publish:
+        description: Exact confirmation for an approved candidate publication
+        required: false
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-trusted-publish-${{ inputs.package_name }}
+  cancel-in-progress: false
+
+jobs:
+
+  candidate:
+    # <lang lang="zh-CN">只使用全局已核对的归档和审批入口。</lang><lang lang="en">Use the coordinated verified archive and approval path.</lang>
+    if: github.ref == 'refs/heads/main' && (inputs.operation == 'candidate-audit' || inputs.operation == 'candidate-publish')
+    uses: mandolin/HIA-Documentation/.github/workflows/publish-npm-candidate.yml@e5c4cc403c8bd6755bd4f83b5988145c087a719d
+    with:
+      release_revision: e5c4cc403c8bd6755bd4f83b5988145c087a719d
+      mode: ${{ inputs.operation == 'candidate-audit' && 'audit' || 'publish' }}
+      package_name: ${{ inputs.package_name }}
+      confirmation: ${{ inputs.confirm_publish }}
+    secrets:
+      bootstrap_token: ${{ secrets.HIA_NPM_BOOTSTRAP_TOKEN }}
