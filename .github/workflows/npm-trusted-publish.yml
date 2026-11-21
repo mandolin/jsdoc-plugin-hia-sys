@@ -34,9 +34,9 @@ jobs:
   candidate:
     # <lang lang="zh-CN">只使用全局已核对的归档和审批入口。</lang><lang lang="en">Use the coordinated verified archive and approval path.</lang>
     if: github.ref == 'refs/heads/main' && (inputs.operation == 'candidate-audit' || inputs.operation == 'candidate-publish')
-    uses: mandolin/HIA-Documentation/.github/workflows/publish-npm-candidate.yml@e5c4cc403c8bd6755bd4f83b5988145c087a719d
+    uses: mandolin/HIA-Documentation/.github/workflows/publish-npm-candidate.yml@c705ea20f180065a0bc255e9ed512e7ada13e908
     with:
-      release_revision: e5c4cc403c8bd6755bd4f83b5988145c087a719d
+      release_revision: c705ea20f180065a0bc255e9ed512e7ada13e908
       mode: ${{ inputs.operation == 'candidate-audit' && 'audit' || 'publish' }}
       package_name: ${{ inputs.package_name }}
       confirmation: ${{ inputs.confirm_publish }}
