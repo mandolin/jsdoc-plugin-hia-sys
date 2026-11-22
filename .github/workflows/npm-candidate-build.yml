@@ -14,6 +14,6 @@ jobs:
   candidate:
     # <lang lang="zh-CN">统一清单和构建逻辑固定于同一提交，使用本仓来源。</lang><lang lang="en">Pin the shared plan and build logic to one revision and use this repository's sources.</lang>
     if: github.ref == 'refs/heads/main'
-    uses: mandolin/HIA-Documentation/.github/workflows/build-npm-candidate.yml@4a06c3e01025c8f0872dc283fca31178e4c3275f
+    uses: mandolin/HIA-Documentation/.github/workflows/build-npm-candidate.yml@ced6b0e77cd199dc5ad87bc7f7f3921743df1e3e
     with:
-      plan_revision: 4a06c3e01025c8f0872dc283fca31178e4c3275f
+      plan_revision: ced6b0e77cd199dc5ad87bc7f7f3921743df1e3e
