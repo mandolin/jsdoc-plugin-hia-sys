@@ -1,0 +1,18 @@
+name: npm stable preflight
+
+on:
+  push:
+    branches:
+      - release/w-p157-stable-preflight
+    paths:
+      - .github/workflows/npm-stable-preflight.yml
+
+permissions:
+  contents: read
+
+jobs:
+  assemble:
+    # <lang lang="zh-CN">隔离分支只生成预检归档。</lang><lang lang="en">The isolated branch only assembles preflight archives.</lang>
+    uses: mandolin/HIA-Documentation/.github/workflows/build-npm-stable-preflight.yml@3e3afd38bdbd39f3992cbe45fb5338d5ea3dc8b0
+    with:
+      plan_revision: 3e3afd38bdbd39f3992cbe45fb5338d5ea3dc8b0
