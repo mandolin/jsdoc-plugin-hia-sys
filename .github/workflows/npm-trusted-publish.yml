@@ -38,9 +38,9 @@ jobs:
   stable:
     # <lang lang="zh-CN">推送只运行审计，正式写入另需默认分支的显式调度和波次授权。</lang><lang lang="en">Pushes only audit; publication requires explicit dispatch from main and wave authorization.</lang>
     if: github.event_name == 'push' || inputs.operation == 'stable-audit' || inputs.operation == 'stable-publish'
-    uses: mandolin/HIA-Documentation/.github/workflows/publish-npm-stable.yml@98252149c0cbe95752de5829d9583c039d6b7e2c
+    uses: mandolin/HIA-Documentation/.github/workflows/publish-npm-stable.yml@dabd25c31ccc8b07e9a6fb18065bc676d99bd6cb
     with:
-      release_revision: 98252149c0cbe95752de5829d9583c039d6b7e2c
+      release_revision: dabd25c31ccc8b07e9a6fb18065bc676d99bd6cb
       mode: ${{ github.event_name == 'workflow_dispatch' && inputs.operation == 'stable-publish' && 'publish' || 'audit' }}
       package_name: ${{ inputs.package_name }}
       confirmation: ${{ inputs.confirm_publish }}
